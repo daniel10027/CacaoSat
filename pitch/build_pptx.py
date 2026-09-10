@@ -353,10 +353,6 @@ def s_cover(ctx: Ctx, sl: Slide) -> None:
     # décor
     _shape(s, MSO_SHAPE.OVAL, 7.45, 0.55, 5.35, 5.35, fill=ORANGE_SOFT)
     _shape(s, MSO_SHAPE.OVAL, 11.75, 4.95, 1.7, 1.7, fill=GREEN_SOFT)
-    _shape(s, MSO_SHAPE.OVAL, 6.9, 5.6, 0.55, 0.55, fill=None, line=ORANGE, line_w=2)
-    _shape(s, MSO_SHAPE.OVAL, 7.45, 0.55, 5.35, 5.35, fill=ORANGE_SOFT)
-    _shape(s, MSO_SHAPE.OVAL, 11.75, 4.95, 1.7, 1.7, fill=GREEN_SOFT)
-    _shape(s, MSO_SHAPE.OVAL, 6.62, 4.02, 0.5, 0.5, fill=None, line=ORANGE, line_w=2)
     _pic(s, LOGO, 8.25, 0.95, w=3.75)
     # kicker
     chip = _chip(s, 0.62, 1.55, 4.62, 0.44, sl.kicker.upper(), fill=GREEN_SOFT,
@@ -906,7 +902,7 @@ def s_proof(ctx: Ctx, sl: Slide) -> None:
     ctx.add(c)
     _txt(s, 0.92, 1.92, 5.8, 0.3,
          [[("Temps de production du dossier de conformité", 12.5, INK, True)]])
-    _pic(s, GEN / "delai.png", 0.85, 2.35, w=5.95)
+    _pic(s, GEN / "delai.png", 0.8, 2.32, w=6.0)
     band = _card(s, 0.62, 5.35, 6.4, 1.4, fill=GREEN_SOFT, line=None)
     _txt(s, 0.95, 5.56, 5.9, 0.4,
          [[("Mock déterministe des services satellite", 12, GREEN_DARK, True)]])

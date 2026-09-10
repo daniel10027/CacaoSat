@@ -144,29 +144,27 @@ def ndvi() -> None:
 
 # ---------------------------------------------------------------- délai
 def delai() -> None:
-    fig, ax = plt.subplots(figsize=(6.3, 2.35), dpi=220)
+    fig, ax = plt.subplots(figsize=(6.1, 2.6), dpi=220)
     fig.patch.set_facecolor("white")
     ax.set_facecolor("white")
 
     rows = [
-        ("À la main aujourd'hui", 1.00, "#B9C2BC", "4–8 semaines"),
+        ("À la main aujourd'hui", 1.00, "#AEB8B1", "4–8 semaines"),
         ("Avec CacaoSat", 0.045, GREEN, "≈ 10 minutes"),
     ]
     for i, (label, width, color, value) in enumerate(rows):
         y = 1 - i
-        ax.barh(y, width, height=0.52, color=color,
-                edgecolor="none", zorder=3,
-                transform=ax.transData)
-        ax.text(-0.02, y + 0.44, label, fontsize=11.5, color=INK,
+        ax.barh(y, width, height=0.42, color=color, edgecolor="none", zorder=3)
+        ax.text(-0.015, y + 0.55, label, fontsize=13, color=INK,
                 fontweight="bold", ha="left", va="center")
-        ax.text(width + 0.015, y, value, fontsize=11.5,
+        ax.text(width + 0.02, y, value, fontsize=13,
                 color=(GREEN_DARK if i == 1 else MUTED), fontweight="bold",
                 ha="left", va="center")
 
-    ax.set_xlim(0, 1.16)
-    ax.set_ylim(-0.55, 1.75)
+    ax.set_xlim(-0.01, 1.24)
+    ax.set_ylim(-0.45, 1.85)
     ax.axis("off")
-    fig.tight_layout(pad=0.3)
+    fig.tight_layout(pad=0.2)
     fig.savefig(GEN / "delai.png", facecolor="white")
     plt.close(fig)
 
