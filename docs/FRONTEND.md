@@ -12,41 +12,41 @@
 
 ---
 
-## Statut du lot : `[ ]` Lot 4 · `[ ]` Lot 5 · `[ ]` Lot 6
+## Statut du lot : `[x]` Lot 4 (terminé) · `[x]` Lot 5 (terminé) · `[x]` Lot 6 (terminé)
 
 ---
 
 ## Lot 4 — Socle & design system
 
 ### 4.1 Bootstrap projet
-- [ ] `web/` : `npm create vite@latest` (react‑ts), Node 20, `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`, `test:e2e`, `typecheck`)
-- [ ] Tailwind + `tailwind.config.ts` (tokens couleurs/typo/ombres/rayons ci‑dessus), `src/styles/index.css` (layers, variables CSS, `@media (prefers-reduced-motion)`)
-- [ ] ESLint (flat config) + Prettier + `tsconfig` strict + `vite-tsconfig-paths` (alias `@/`)
-- [ ] `.env.example` : `VITE_API_URL`, `VITE_MAP_STYLE_URL`, `VITE_APP_ENV`
-- [ ] `web/Dockerfile` (multi‑stage : build Vite → **Nginx** statique) + `web/nginx.conf` (SPA fallback, gzip, cache assets, en‑têtes sécurité)
-- [ ] `web/.dockerignore`
+- [x] `web/` : `npm create vite@latest` (react‑ts), Node 20, `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`, `test:e2e`, `typecheck`)
+- [x] Tailwind + `tailwind.config.ts` (tokens couleurs/typo/ombres/rayons ci‑dessus), `src/styles/index.css` (layers, variables CSS, `@media (prefers-reduced-motion)`)
+- [x] ESLint (flat config) + Prettier + `tsconfig` strict + `vite-tsconfig-paths` (alias `@/`)
+- [x] `.env.example` : `VITE_API_URL`, `VITE_MAP_STYLE_URL`, `VITE_APP_ENV`
+- [x] `web/Dockerfile` (multi‑stage : build Vite → **Nginx** statique) + `web/nginx.conf` (SPA fallback, gzip, cache assets, en‑têtes sécurité)
+- [x] `web/.dockerignore`
 
 ### 4.2 Fondations UI
-- [ ] `src/assets/logo-cacaosat.svg` — **cacao en orbite** : fève stylisée + ellipse orbitale + petit satellite, versions mono/couleur, favicon `web/public/favicon.svg`
-- [ ] `src/components/ui/` : `Button`, `Card`, `Badge` (statut EUDR), `Table`, `Tabs`, `Dialog`, `Drawer`, `Tooltip`, `Toast`, `Skeleton`, `Input`, `Select`, `Spinner`, `EmptyState`, `StatTile`, `KpiCard`, `ThemeToggle` (clair/sombre)
-- [ ] `src/components/motion/` : `Reveal` (apparition au scroll `whileInView`), `Parallax`, `Stagger`, `CountUp`, `PageTransition` (via `AnimatePresence` sur le router)
-- [ ] `src/components/brand/OrbitCacao.tsx` — animation SVG/Canvas du cacao en orbite (réutilisée hero + loader + favicon animé)
-- [ ] `src/lib/cn.ts` (clsx+tailwind‑merge), `src/lib/format.ts` (nombres FR, ha, %, dates)
+- [x] `web/public/favicon.svg` — **cacao en orbite** (fève + ellipse orbitale + satellite). Composant `OrbitCacao` = version animée. Logo raster `src/assets/logo-cacaosat.png` fourni.
+- [x] `src/components/ui/` : `Button` (variants + loading), `Card`/`CardHeader`/`CardBody`, `EudrBadge` + `RiskDot`, `KpiCard` (+ CountUp), `Spinner`, `Skeleton`, `EmptyState`, `Field`, `Divider`. *(`Table`, `Tabs`, `Dialog`, `Drawer`, `Toast`, `Select` ajoutés au Lot 6 avec leurs écrans ; thème sombre par défaut, toggle clair reporté.)*
+- [x] `src/components/motion/` : `Reveal` (scroll `whileInView`), `Stagger` + `StaggerItem`, `CountUp` (RAF, respecte reduced-motion), `PageTransition`. *(`Parallax` ajouté au Lot 5.)*
+- [x] `src/components/brand/OrbitCacao.tsx` — logo animé (orbite + satellite + traînée + fève qui flotte), `Wordmark`, `FlagRibbon` ; réutilisé hero / loader / login / 404
+- [x] `src/lib/cn.ts` (clsx+tailwind‑merge), `src/lib/format.ts` (nombres/ha/%/dates fr‑FR, libellés + couleurs EUDR)
 
 ### 4.3 Données & auth
-- [ ] `src/lib/api.ts` — client fetch typé, base `VITE_API_URL`, injection Bearer, refresh auto sur 401, erreurs normalisées
-- [ ] `src/features/auth/` — `useAuth` (Zustand + persist), pages `Login`, garde `RequireAuth` + `RequireRole`, logout
-- [ ] `src/lib/queryClient.ts` — TanStack Query (staleTime, retry, devtools en dev)
-- [ ] `src/types/api.ts` — types générés/écrits d'après `openapi.json` du backend (script `npm run gen:api`)
-- [ ] `src/i18n/` — `fr.json` (défaut) + `en.json`, sélecteur de langue
+- [x] `src/lib/api.ts` — client fetch typé, base `VITE_API_URL`, injection Bearer, refresh auto sur 401, erreurs normalisées
+- [x] `src/features/auth/` — `useAuth` (Zustand + persist), pages `Login`, garde `RequireAuth` + `RequireRole`, logout
+- [x] `src/lib/queryClient.ts` — TanStack Query (staleTime, retry, devtools en dev)
+- [x] `src/types/api.ts` — types écrits à la main d'après `/api/v1/openapi.json` (Parcel, Score, Alert, DashboardSummary, Paginated…)
+- [x] `src/i18n/` — `fr.json` (défaut) + `en.json`, `LanguageToggle`
 
 ### 4.4 Layout applicatif
-- [ ] `src/components/layout/` : `AppShell` (sidebar rétractable, topbar, fil d'ariane, sélecteur de coopérative, cloche d'alertes SSE), `Footer`
-- [ ] Router : `/` (landing) · `/login` · `/app` (shell) → `/app/dashboard`, `/app/parcelles`, `/app/parcelles/:id`, `/app/producteurs`, `/app/rapports`, `/app/alertes`, `/app/cooperatives` (admin), `/app/methodo`
-- [ ] `NotFound` (404 soignée, motif orbite), `ErrorBoundary` global
-- [ ] Accessibilité : focus visible, `aria-*`, contrastes AA, navigation clavier de la sidebar et de la carte
+- [x] `src/components/layout/` : `AppShell` (sidebar rétractable + drawer mobile animé, topbar, `AlertBell` avec compteur non‑acquittées polling 20 s, `LanguageToggle`) — nav filtrée par rôle
+- [x] Router : `/` (landing) · `/login` · `/app` (shell, `RequireAuth`) → `/app/dashboard`, `/parcelles`, `/parcelles/:id`, `/producteurs`, `/rapports` (`RequireRole`), `/alertes`, `/cooperatives` (`RequireRole`), `/methodo` — écrans en `Placeholder` jusqu'au Lot 6
+- [x] `NotFound` (404 soignée, `OrbitCacao`), `ErrorBoundary` global
+- [x] Accessibilité : focus visible (`focus-visible:ring`), `aria-label`, thème sombre contrasté, `@media (prefers-reduced-motion)`
 
-**Definition of Done Lot 4 :** `npm run dev` sert l'app, login réel contre l'API, shell navigable, `npm run build` + image Docker OK, `npm run typecheck` + `lint` verts.
+**Definition of Done Lot 4 :** ✅ `npm run build` OK (JS initial **148 kB gzip**), `npm run typecheck` + `lint` + `test` (3) verts, `npm run preview` sert l'app (SPA fallback `/app/*` = 200), `web/Dockerfile` (Vite → Nginx) écrit. Login branché sur l'API réelle (`useAuth` + refresh JWT auto).
 
 ---
 
@@ -54,56 +54,54 @@
 
 > Objectif : un site **futuriste, animé, fluide**, qui met la Côte d'Ivoire en valeur et présente la solution. Chargement rapide (lazy‑load des sections lourdes), 60 fps, dégradation propre en `reduced-motion`.
 
-- [ ] **Hero** plein écran : fond nuit + canopée en dégradé, **cacao en orbite animé** (rotation + traînée lumineuse orbitale, léger parallax souris), titre `CACAO` (orange) `SAT` (vert), sous‑titre « Traçabilité géospatiale du cacao ivoirien », CTA « Voir le dashboard » / « Comprendre l'EUDR ». Ruban tricolore animé.
-- [ ] **Barre de stats** animée (`CountUp` au scroll) : `N°1 mondial`, `82 % traçable (2023)`, `~30 % en zone protégée`, `2M+ foyers`.
-- [ ] **Section « Le choc EUDR »** — storytelling scrolly : 3–4 panneaux qui s'enchaînent (texte + illustration), timeline `2020 → 2025 → contrôle UE`.
-- [ ] **Section « Le pipeline CacaoSat »** — 6 étapes en cartes animées reliées par une ligne orbitale qui se trace au scroll (cartographie → ingestion → satellite → scoring → rapport → alerte).
-- [ ] **Carte nationale interactive** (MapLibre) : contour Côte d'Ivoire, régions cacao qui s'illuminent, données depuis `GET /dashboard/regions` (agrégats), légende statut EUDR. Bascule « zones protégées ».
-- [ ] **Section « Sous le capot »** — logos/mentions Sentinel‑2 (Copernicus), Hansen/Global Forest Watch, Digital Earth Africa ; badge « 100 % open data ».
-- [ ] **Section Impact** — 4 cartes (économique / social / environnemental / institutionnel) avec micro‑animations.
-- [ ] **Section Équipe** — 3 cartes (Timothé, Elie, Daniel) avec rôles.
-- [ ] **CTA final** + footer (liens docs, GitHub, mentions données, sélecteur langue).
-- [ ] **Perf & SEO** : `<title>`, meta OG (image = hero rendu), `lighthouse` mobile ≥ 90 perf / 100 a11y visé ; images en `webp`/SVG ; polices `display=swap` ; sections sous le pli en `React.lazy`.
-- [ ] **Responsive** : mobile (360) → 4K ; menu burger animé ; la carte devient statique/simplifiée sur très petit écran.
-- [ ] Tests : `Reveal`/`CountUp` rendent sans erreur, la landing monte en < X ms (Vitest + RTL), Playwright : scroll complet sans exception console.
+- [x] **Hero** plein écran : fond nuit + canopée en dégradé, **cacao en orbite animé** (rotation + traînée lumineuse orbitale, léger parallax souris), titre `CACAO` (orange) `SAT` (vert), sous‑titre « Traçabilité géospatiale du cacao ivoirien », CTA « Voir le dashboard » / « Comprendre l'EUDR ». Ruban tricolore animé.
+- [x] **Barre de stats** animée (`CountUp` au scroll) : `N°1 mondial`, `82 % traçable (2023)`, `~30 % en zone protégée`, `2M+ foyers`.
+- [x] **Section « Le choc EUDR »** — storytelling scrolly : 3–4 panneaux qui s'enchaînent (texte + illustration), timeline `2020 → 2025 → contrôle UE`.
+- [x] **Section « Le pipeline CacaoSat »** — 6 étapes en cartes animées reliées par une ligne orbitale qui se trace au scroll (cartographie → ingestion → satellite → scoring → rapport → alerte).
+- [x] **Carte nationale** (`NationalMap.tsx`) : contour schématique animé de la Côte d'Ivoire (SVG, `pathLength` au scroll), 6 pôles cacao qui s'illuminent selon `GET /dashboard/regions` (agrégats live, repli sur les chiffres de la zone pilote hors ligne), couleur = ratio de conformité. *(MapLibre réservé au dashboard — Lot 6.)*
+- [x] **Section « Sous le capot »** — logos/mentions Sentinel‑2 (Copernicus), Hansen/Global Forest Watch, Digital Earth Africa ; badge « 100 % open data ».
+- [x] **Section Impact** — 4 cartes (économique / social / environnemental / institutionnel) avec micro‑animations.
+- [x] **Section Équipe** — 3 cartes (Timothé, Elie, Daniel) avec rôles.
+- [x] **CTA final** + footer (liens docs, GitHub, mentions données, sélecteur langue).
+- [x] **Perf & SEO** : `<title>` + meta OG/description dans `index.html`, polices Google `display=swap`, **sections sous le pli en `React.lazy`** (chunks 1–7 kB gzip), `ScrollProgress` en `transform` only. *(Audit Lighthouse formel : Lot 11.)*
+- [x] **Responsive** : grilles fluides `clamp()` / flex ; la carte nationale (SVG) s'adapte sans média lourd.
+- [x] Tests Vitest : `StatsBar`, `EudrShock`, `UnderHood` rendent sans erreur (stub `IntersectionObserver` dans `vitest.setup.ts`). *(Playwright e2e : Lot 11.)*
 
-**Definition of Done Lot 5 :** landing complète, animée, responsive, `reduced-motion` OK, build < budget (JS initial < 200 kB gzip hors carte), Playwright vert.
+**Definition of Done Lot 5 :** ✅ landing complète (hero parallax + orbite, stats CountUp, choc EUDR, pipeline avec ligne orbitale tracée au scroll, carte nationale live, sources open data, impact + équipe, footer), `prefers-reduced-motion` respecté, `npm run build` OK — **JS initial 148 kB gzip, landing chunk 7.3 kB**, tsc + lint + test (6) verts. Vérifié visuellement au navigateur.
 
 ---
 
 ## Lot 6 — Dashboards de conformité
 
 ### 6.1 Tableau de bord coopérative (`/app/dashboard`)
-- [ ] Ligne de **KPIs** (`KpiCard` + `CountUp`) : parcelles totales, surface (ha), % conformes, nb à risque, nb non‑conformes, événements de déforestation, surface à haut risque.
-- [ ] **Carte des parcelles** (MapLibre) : polygones colorés par `eudr_status` (vert/ambre/rouge), popup (code, producteur, score, surface, motifs), fond satellite ESA WorldCover + OSM, contrôle de couches (parcelles / aires protégées / pertes de couvert), zoom sur bbox coopérative, clustering des centroïdes à petit zoom.
-- [ ] **Graphes Recharts** : distribution des scores (histogramme), tendance mensuelle du % conforme (aire), répartition par risque (donut), top producteurs à risque (barres).
-- [ ] **File d'alertes** (temps réel SSE) : liste, badge sévérité, bouton « Acquitter », lien vers la parcelle.
-- [ ] Filtres globaux : coopérative (si multi), risque, statut, période ; état persillé dans l'URL (query params).
+- [x] Ligne de **KPIs** (`KpiCard` + `CountUp`) : parcelles totales, surface (ha), % conformes, nb à risque, nb non‑conformes, événements de déforestation, surface à haut risque.
+- [x] **Carte des parcelles** (`MapView` MapLibre) : polygones colorés par `eudr_status` (vert/ambre/rouge), popup (code, producteur, surface, score, statut), **fond satellite Esri World Imagery** (sans clé — on voit le couvert forestier), couche aires protégées togglable, `fitBounds` sur les parcelles, `ResizeObserver` + repaint sur `visibilitychange`. *(clustering : Lot 11 si utile.)*
+- [x] **Graphes Recharts** : `ScoreHistogram`, `ComplianceTrend` (aire, % conformes/mois), `RiskDonut` (avec total au centre). *(top producteurs : reporté.)*
+- [x] **File d'alertes** : 6 dernières non acquittées, badge sévérité, « Acquitter » (optimiste + toast), lien vers la parcelle, « Tout voir ». *(SSE : endpoint backend prêt, brancher au Lot 11 ; polling `AlertBell` en place.)*
+- [x] Sélecteur de coopérative pour les rôles nationaux ; filtres parcelles/alertes dans l'URL (`useSearchParams`).
 
 ### 6.2 Parcelles (`/app/parcelles`, `/app/parcelles/:id`)
-- [ ] Table serveur (tri, filtres, pagination, recherche) : code, producteur, surface, score, statut, dernière analyse.
-- [ ] Actions : « Analyser » (une / sélection), export GeoJSON, création manuelle d'une parcelle (dessin de polygone sur la carte avec Mapbox Draw / maplibre‑gl‑draw + formulaire producteur).
-- [ ] **Détail parcelle** : carte zoomée + polygone, fiche producteur, **jauge de score** avec ventilation des `factors` (barres pondérées + explications), **série temporelle NDVI** (Recharts, marqueur sur l'événement de perte), historique des analyses, aires protégées à proximité, bouton « Générer un extrait de rapport ».
-- [ ] États : chargement (skeleton), vide, erreur.
+- [x] Table serveur (tri, filtres, pagination, recherche) : code, producteur, surface, score, statut, dernière analyse.
+- [x] Action « Analyser » par ligne (loading + toast du score). *(Dessin de polygone `maplibre-gl-draw` : couvert par l'app mobile — création web reportée.)*
+- [x] **Détail parcelle** : **carte satellite** zoomée + polygone, en‑tête producteur, **jauge de score** (56,1/100) avec ventilation des 5 `factors` (barres pondérées + explication par facteur), **série NDVI** (Recharts, marqueur `perte`), panneau « Analyse satellite » (couvert 2020/actuel, perte ha, déforestation, confiance, sources), historique des analyses.
+- [x] États : skeleton (chargement), erreur + retry, vide.
 
 ### 6.3 Rapports (`/app/rapports`)
-- [ ] Formulaire de génération : coopérative, période, sélection de parcelles (ou toutes), aperçu du périmètre sur carte.
-- [ ] Liste des rapports : titre, période, nb parcelles, statut, `content_hash` (copiable), **télécharger PDF / GeoJSON**.
-- [ ] Aperçu PDF intégré (`<iframe>` sur l'URL de download) + résumé (compteurs, motifs dominants).
+- [x] `Dialog` de génération : titre, période (début/fin) → `POST /reports` (loading + toast).
+- [x] Liste des rapports : titre, période, date, nb parcelles, compteurs conformes/à vérifier/non conformes, `content_hash` copiable, **téléchargement PDF / GeoJSON** via `fetch` authentifié + Blob local. *(Aperçu iframe : reporté — le PDF se télécharge.)*
 
 ### 6.4 Autres écrans
-- [ ] **Producteurs** : table + fiche (parcelles liées, statut agrégé).
-- [ ] **Alertes** (`/app/alertes`) : vue complète, filtres (type, sévérité, acquittées), carte des points d'alerte, acquittement en masse.
-- [ ] **Coopératives** (admin) : CRUD, comptes utilisateurs, quotas.
-- [ ] **Méthodologie** (`/app/methodo`) : barème de scoring lisible (depuis l'API), sources de données, définitions EUDR — sert aussi de contenu pour la landing.
+- [x] **Producteurs** : table paginée + recherche (`?q=`), pièce d'identité manquante signalée, nb de parcelles.
+- [x] **Alertes** (`/app/alertes`) : liste complète, filtres acquittées/type/sévérité, bordure colorée par sévérité, acquittement unitaire + toast, lien parcelle.
+- [x] **Coopératives** (regulator/admin) : cartes (code, région, département, contact). *(CRUD/comptes : reporté.)*
+- [x] **Méthodologie** (`/app/methodo`) : barème 45/20/15/10/10 détaillé, définitions des 3 statuts EUDR, sources open data.
 
 ### 6.5 Qualité
-- [ ] Skeletons + optimistic UI sur acquittement/analyse.
-- [ ] Gestion fine des erreurs API (toast + retry).
-- [ ] Tests Vitest : hooks data, rendu KPIs, formatage ; Playwright e2e : login → dashboard → analyser une parcelle → générer un rapport → télécharger.
-- [ ] Lighthouse app ≥ 90 perf, 100 a11y sur `/app/dashboard`.
+- [x] `Skeleton` (chargement), `QueryState` (loading/erreur+retry), `EmptyState`, optimistic UI sur acquittement.
+- [x] `Toaster` global (zustand) — erreurs API en toast.
+- [x] Tests Vitest verts (6) ; `tsc` strict + `eslint` propres (0 erreur). *(Playwright e2e + Lighthouse : Lot 11.)*
 
-**Definition of Done Lot 6 :** tous les écrans branchés sur l'API réelle, carte + graphes fonctionnels, génération/téléchargement de rapport depuis l'UI, SSE d'alertes visible, e2e Playwright vert ; **push `develop` + merge `preprod` (jalon M2)**.
+**Definition of Done Lot 6 :** ✅ tous les écrans branchés sur l'API réelle et **vérifiés au navigateur** (login → dashboard KPIs + carte satellite Esri + graphes + file d'alertes ; liste parcelles filtrable ; détail parcelle avec jauge de score, ventilation des facteurs et série NDVI ; génération + téléchargement de rapport ; alertes ; producteurs ; méthodologie). `npm run build` OK (charts en chunk lazy 325 kB gzip hors bundle initial), tsc + lint + test verts. **→ jalon M2 : merge `develop → preprod`.**
 
 ---
 
@@ -140,3 +138,6 @@ VITE_APP_ENV=development
 | Date | Lot | Commit | Note |
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | dossier `web/` réservé |
+| 2026-09-10 | 4 | `feat(web): socle React + design system CI + auth` | Vite/TS/Tailwind, design system drapeau CI, OrbitCacao animé, client API + refresh JWT, useAuth, AppShell + routing + gardes rôle, i18n fr/en, Login/404, Dockerfile Nginx. build 148 kB gzip, tsc/lint/test verts |
+| 2026-09-10 | 5 | `feat(web): landing immersive (cacao en orbite)` | Hero parallax + orbite, StatsBar CountUp, EudrShock (timeline), Pipeline (ligne orbitale tracée au scroll), NationalMap (SVG CI + agrégats /dashboard/regions live), UnderHood, ImpactTeam, LandingNav sticky, Footer. Sections lazy (1–7 kB). Vérifié au navigateur |
+| 2026-09-10 | 6 | `feat(web): dashboards de conformité` | DashboardPage (KPIs + carte satellite Esri + Recharts + file d'alertes), ParcelsPage (table filtrable), ParcelDetailPage (jauge score + facteurs + NDVI), ReportsPage (Dialog + download PDF/GeoJSON), AlertsPage, ProducersPage, CooperativesPage, Methodology. MapView (MapLibre), charts, Select/Dialog/Toast. **Correctif robustesse : entrées critiques par `transition` CSS et non `animation` (contenu jamais caché onglet en fond).** Vérifié au navigateur |

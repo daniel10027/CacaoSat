@@ -1,0 +1,47 @@
+{
+  "brand": { "tagline": "Space to build" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "parcels": "Plots",
+    "producers": "Producers",
+    "reports": "Reports",
+    "alerts": "Alerts",
+    "cooperatives": "Cooperatives",
+    "methodology": "Methodology",
+    "logout": "Sign out"
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Access your cooperative's EUDR compliance dashboard.",
+    "email": "Email address",
+    "password": "Password",
+    "submit": "Sign in",
+    "loading": "Signing in…",
+    "error": "Invalid credentials.",
+    "demo": "Demo accounts"
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Retry",
+    "empty": "No data",
+    "search": "Search",
+    "all": "All",
+    "close": "Close",
+    "download": "Download",
+    "analyze": "Analyze",
+    "generate": "Generate",
+    "acknowledge": "Acknowledge",
+    "error": "Something went wrong"
+  },
+  "eudr": {
+    "compliant": "Compliant",
+    "at_risk": "At risk",
+    "non_compliant": "Non-compliant",
+    "unassessed": "Not assessed"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "This orbit leads nowhere.",
+    "home": "Back home"
+  }
+}
