@@ -1,0 +1,41 @@
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Cible
+        type: choice
+        options: [preprod, prod]
+        default: preprod
+  push:
+    branches: [prod]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'prod' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déploiement SSH (docker compose sur l'hôte)
+        if: ${{ secrets.SSH_HOST != '' }}
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH || '/opt/cacaosat' }}
+            git fetch --all
+            git checkout ${{ github.ref_name }}
+            git pull
+            echo "${{ secrets.REGISTRY_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose --profile prod pull
+            docker compose --profile prod up -d
+            docker compose exec -T backend flask db upgrade
+            curl -fsS http://localhost/api/v1/health/ready
+      - name: Rappel (secrets absents)
+        if: ${{ secrets.SSH_HOST == '' }}
+        run: |
+          echo "::notice::Déploiement sauté — définir les secrets SSH_HOST / SSH_USER / SSH_KEY."
+          echo "Voir infra/deploy/README.md pour l'auto-hébergement, ou render.yaml / fly.toml / netlify.toml."

@@ -1,0 +1,34 @@
+{
+  "title": "CacaoSat",
+  "uid": "cacaosat-main",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Parcelles",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "targets": [{ "expr": "cacaosat_parcels_total" }]
+    },
+    {
+      "type": "stat",
+      "title": "Analyses",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "targets": [{ "expr": "cacaosat_analyses_total" }]
+    },
+    {
+      "type": "stat",
+      "title": "Alertes",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "targets": [{ "expr": "cacaosat_alerts_total" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Uptime backend (s)",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 5 },
+      "targets": [{ "expr": "cacaosat_uptime_seconds" }]
+    }
+  ]
+}
