@@ -1,0 +1,57 @@
+# Normalisation des fins de ligne.
+#
+# Sans ce fichier, le comportement de Git dépend du réglage `core.autocrlf`
+# de chaque poste : Git for Windows l'active par défaut et convertit les LF
+# du dépôt en CRLF à la sortie. Un script shell ainsi converti casse dès le
+# shebang (`env: 'sh\r': No such file or directory`), que ce soit dans Git
+# Bash ou dans un conteneur Linux. Les attributs ci-dessous sont prioritaires
+# sur `core.autocrlf` et garantissent le même checkout pour toute l'équipe.
+
+# Par défaut : détection auto du binaire, LF dans le répertoire de travail.
+* text=auto eol=lf
+
+# Scripts exécutés par un shell POSIX — LF obligatoire.
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+Makefile text eol=lf
+*.mako text eol=lf
+gradlew text eol=lf
+
+# Scripts natifs Windows — CRLF obligatoire (cmd.exe n'accepte pas les LF).
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+gradlew.bat text eol=crlf
+
+# Binaires — aucune conversion, jamais.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.svg text eol=lf
+*.pdf binary
+*.pptx binary
+*.docx binary
+*.xlsx binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.gz binary
+*.tgz binary
+*.mbtiles binary
+*.tif binary
+*.tiff binary
+*.jar binary
+*.keystore binary
+*.jks binary
+*.apk binary
+*.aab binary
+*.so binary
+*.dylib binary
+*.xcuserstate binary
