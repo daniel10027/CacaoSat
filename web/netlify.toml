@@ -1,0 +1,14 @@
+# Déploiement de référence du web sur Netlify (free tier). Non requis pour la démo.
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  VITE_API_URL = "/api/v1"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

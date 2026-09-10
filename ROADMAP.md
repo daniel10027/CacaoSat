@@ -21,17 +21,17 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 | Lot | Titre | Doc de détail | Statut | Push |
 |-----|-------|---------------|--------|------|
 | 0 | Fondations du dépôt | ce fichier | `[x]` | `chore: bootstrap monorepo + tracking docs` |
-| 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
-| 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
-| 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
-| 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
-| 5 | Web — landing page immersive (cacao en orbite) | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
-| 6 | Web — dashboards conformité (carte, KPIs, rapports, alertes) | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
-| 7 | Mobile — socle Flutter (thème, DB locale, auth, nav) | [MOBILE.md](docs/MOBILE.md) | `[ ]` | — |
-| 8 | Mobile — collecte terrain hors‑ligne + sync différée | [MOBILE.md](docs/MOBILE.md) | `[ ]` | — |
-| 9 | Infra — Docker Compose, CI/CD, `dev.sh`, observabilité | [INFRA.md](docs/INFRA.md) | `[ ]` | — |
-| 10 | Pitch — deck 5 min PPTX + PDF | ce fichier | `[ ]` | — |
-| 11 | Durcissement, seed démo, release preprod/prod | ce fichier | `[ ]` | — |
+| 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): socle Flask + PostGIS + auth JWT` |
+| 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): moteur satellite mock + scoring EUDR + API métier` |
+| 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): rapports PDF/GeoJSON + alertes précoces + sync mobile` |
+| 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): socle React + design system CI + auth` |
+| 5 | Web — landing page immersive (cacao en orbite) | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): landing immersive (cacao en orbite)` |
+| 6 | Web — dashboards conformité (carte, KPIs, rapports, alertes) | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): dashboards de conformité` |
+| 7 | Mobile — socle Flutter (thème, DB locale, auth, nav) | [MOBILE.md](docs/MOBILE.md) | `[x]` | `feat(mobile): app Flutter de collecte terrain hors-ligne` |
+| 8 | Mobile — collecte terrain hors‑ligne + sync différée | [MOBILE.md](docs/MOBILE.md) | `[x]` | (idem — Lots 7 & 8 livrés ensemble) |
+| 9 | Infra — Docker Compose, CI/CD, `dev.sh`, observabilité | [INFRA.md](docs/INFRA.md) | `[x]` | `feat(infra): docker-compose complet + CI/CD + scripts dev` |
+| 10 | Pitch — deck 5 min PPTX + PDF | ce fichier | `[x]` | `feat(pitch): deck 5 min PPTX + PDF (python-pptx / reportlab)` |
+| 11 | Durcissement, seed démo, release preprod/prod | ce fichier | `[x]` | `chore(release): durcissement + seed démo curated + v1.0.0` |
 
 ---
 
@@ -46,17 +46,68 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 - [x] `docs/BACKEND.md`, `docs/FRONTEND.md`, `docs/MOBILE.md`, `docs/INFRA.md` — listes de tâches détaillées
 - [x] `git init`, commit initial sur `main`, création des branches `develop`, `preprod`, `prod`
 - [x] `git remote add origin https://github.com/daniel10027/CacaoSat.git`
-- [ ] 🔒 `git push` des 4 branches — **nécessite `gh auth login` par l'utilisateur** (voir « Accès GitHub » plus bas)
+- [x] `git push` des 4 branches `main` / `develop` / `preprod` / `prod` (credential helper macOS actif)
 
-**Definition of Done :** `git log` montre le commit de bootstrap, `git branch` liste `develop/preprod/prod`, les 6 docs existent.
+**Definition of Done :** `git log` montre le commit de bootstrap, `git branch` liste `develop/preprod/prod`, les 6 docs existent. ✅ **Lot 0 terminé** — 4 branches sur `origin`, travail en cours sur `develop`.
 
 ---
 
-## Lot 10 — Pitch (5 minutes)  `[ ]`
+## Lot 1 — Backend, socle  `[x]`
 
-- [ ] `pitch/build_deck.py` — génération du `.pptx` via **python-pptx** (aucun outil payant)
-- [ ] Charte : drapeau CI (orange `#FF8200`, blanc, vert `#009A44`), logo cacao en orbite, typo libre (Poppins/Inter)
-- [ ] Trame 5 min / ~12 slides :
+Détail des tâches : [docs/BACKEND.md § Lot 1](docs/BACKEND.md). Résumé livré :
+
+- [x] Application factory Flask (`create_app`), configs Dev/Test/Prod, logs JSON, enveloppe d'erreurs uniforme
+- [x] 10 modèles SQLAlchemy + PostGIS (`Cooperative, User, Producer, Parcel, AnalysisRun, ComplianceScore, ComplianceReport, Alert, SyncBatch, AuditLog`)
+- [x] Migration Alembic initiale **réversible** (up/down testés), extension PostGIS activée, index GiST sur `parcels.geometry`
+- [x] Auth : hachage **argon2**, JWT access/refresh, claims `role`/`cooperative_id`, `@roles_required`, rate‑limit login
+- [x] Endpoints : `/health`, `/health/ready` (DB+Redis), `/metrics` (Prometheus), `/auth/login|refresh|me`, `/openapi.json`
+- [x] `flask seed` (9 comptes, 2 coopératives) + `flask seed-demo` (24 producteurs, 41 parcelles géolocalisées)
+- [x] `Dockerfile` multi‑stage non‑root + `entrypoint.sh` (attente DB → `db upgrade` → seed) + `gunicorn.conf.py`
+- [x] `infra/docker-compose.dev.yml` (PostGIS, Redis, MailHog, MinIO) + `docker-compose.yml` racine (db, redis, backend, …)
+- [x] Suite **pytest : 20 tests verts, couverture 85 %**, `ruff check` propre
+
+**Definition of Done :** ✅ `make test` vert (85 %), `docker compose up --build backend db` opérationnel, `flask db upgrade`/`downgrade` réversibles, `/health/ready`=200, `/auth/login`→JWT.
+
+---
+
+## Lot 2 — Backend, moteur satellite + scoring EUDR + API métier  `[x]`
+
+Détail : [docs/BACKEND.md § Lot 2](docs/BACKEND.md). Résumé livré :
+
+- [x] **Mocks déterministes** (RNG NumPy seedé par `hash(parcel.id)`) : Sentinel‑2 (série NDVI mensuelle, chute simulable), Hansen/GFW (couvert 2000/2020, perte annuelle post‑2020), Digital Earth Africa (indice de dégradation), aires protégées (GeoJSON embarqué, recouvrement géométrique réel) + mocks e‑mail (MailHog)/SMS
+- [x] **Moteur d'analyse** `run_analysis` : détection de rupture NDVI (moyenne glissante), `forest_loss_ha`, `loss_events`, recouvrement aire protégée, `confidence` (accord des signaux) → `AnalysisRun`
+- [x] **Moteur de scoring EUDR** `compute_score` : 5 facteurs pondérés (45/20/15/10/10), `factors[]` explicable, `risk_level` + `eudr_status` dérivés
+- [x] **API métier** : CRUD `/cooperatives` `/producers` `/parcels` (scoping par rôle, pagination, filtres `risk_level`/`eudr_status`/`bbox`/`q`, tri), `POST /parcels/{id}/analyze`, `POST /analysis/batch`, `GET /parcels/{id}/history`, `GET /parcels/{id}.geojson`
+- [x] **Dashboard** : `/dashboard/summary` (KPIs, distribution de score, tendance mensuelle), `/dashboard/map` (FeatureCollection scorée), `/dashboard/regions` (agrégats nationaux, public)
+- [x] **OpenAPI 3.0.3** `/openapi.json` (25 routes) + console `/docs`
+- [x] **62 tests** pytest verts, couverture **86 %**, `ruff` propre
+
+**Definition of Done :** ✅ validé en conteneur (`docker compose up`) — chaîne parcelle → analyse → score → dashboard opérationnelle de bout en bout ; batch 21/21 ; jeu de démo → 12 conformes / 4 à risque / 5 non‑conformes.
+
+---
+
+## Lot 3 — Backend, rapports + alertes + sync mobile  `[x]`
+
+Détail : [docs/BACKEND.md § Lot 3](docs/BACKEND.md). Résumé livré :
+
+- [x] **Rapport / certificat EUDR** (`app/services/report.py`) : PDF ReportLab (en‑tête, préambule légal, synthèse, **carte des parcelles** couleur = statut, tableau par producteur, annexe sources) + **export GeoJSON** au gabarit exportateurs + `content_hash` SHA‑256 stable
+- [x] **Stockage** `app/storage.py` : MinIO/S3 (`boto3`) si joignable, repli disque local
+- [x] `POST/GET /reports`, `GET /reports/{id}`, `GET /reports/{id}/download?format=pdf|geojson`
+- [x] **Alertes précoces** (`app/services/alerts.py`) : `scan_for_alerts` compare dernière/précédente analyse → `new_deforestation` / `protected_encroachment` / `data_gap`, dédup tant que non acquittée, notif MailHog + SMS (mock) aux managers
+- [x] `GET /alerts` (filtres + pagination), `GET /alerts/{id}`, `POST /alerts/{id}/acknowledge`, `POST /alerts/scan`, `GET /alerts/stream` (SSE)
+- [x] **Sync mobile** (`app/services/sync.py`) : `GET /sync/bootstrap` (coopérative, producteurs, parcelles, aires protégées, barème), `POST /sync/batch` (idempotent via `client_batch_id`, LWW horodaté, `id_map` client→serveur, analyse déclenchée), `GET /sync/status/{id}`
+- [x] **Job planifié** `app/tasks/scheduler.py` (APScheduler, `SCHEDULER_ENABLED=1`) + CLI `flask reanalyze|scan-alerts|make-report`
+- [x] `app/audit.py` (journal d'audit), **76 tests** (couverture **83 %**), `ruff` propre
+
+**Definition of Done :** ✅ validé en conteneur — rapport PDF+GeoJSON téléchargeables, alertes créées + notifiées, batch mobile simulé (producteur+parcelle, rejeu idempotent, analyse auto). **Backend complet → jalon M1 (merge `develop → preprod`).**
+
+---
+
+## Lot 10 — Pitch (5 minutes)  `[x]`
+
+- [x] `pitch/build_deck.py` — génération du `.pptx` via **python-pptx** (aucun outil payant)
+- [x] Charte : drapeau CI (orange `#FF8200`, blanc, vert `#009A44`), logo cacao en orbite, typo libre (Poppins/Inter)
+- [x] Trame 5 min / ~12 slides :
   1. Titre — *CacaoSat, le spatial pour bâtir*
   2. Le choc réglementaire EUDR (chiffres : N°1 mondial, 82 %, 30 %, 2M+ foyers)
   3. Qui porte le poids : les petites coopératives
@@ -69,23 +120,23 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
   10. Impact — économique / social / environnemental / institutionnel
   11. Au‑delà du hackathon — pilote coopérative + Conseil du Café‑Cacao
   12. L'équipe + appel à soutien
-- [ ] Export **PDF** (`libreoffice --headless --convert-to pdf`) → `pitch/CacaoSat-Pitch.pdf`
-- [ ] `pitch/SCRIPT.md` — texte minuté du pitch (chrono par slide)
-- [ ] `make pitch` régénère `.pptx` + `.pdf`
+- [x] Export **PDF** — `pitch/build_pdf.py` (ReportLab, autonome, une slide/page paysage) ; conversion LibreOffice optionnelle si `soffice` présent
+- [x] `pitch/SCRIPT.md` — texte minuté du pitch (chrono par slide)
+- [x] `make pitch` régénère `.pptx` + `.pdf`
 
-**Definition of Done :** `pitch/CacaoSat-Pitch.pptx` et `.pdf` présents, régénérables, cohérents avec la démo.
+**Definition of Done :** ✅ `pitch/CacaoSat-Pitch.pptx` (12 slides, notes du présentateur) + `CacaoSat-Pitch.pdf` (12 pages, ~5 min) + `SCRIPT.md` (texte minuté) générés par `python3 pitch/build_deck.py` / `make pitch` ; charte drapeau CI ; cohérents avec la démo.
 
 ---
 
-## Lot 11 — Durcissement & release  `[ ]`
+## Lot 11 — Durcissement & release  `[x]`
 
-- [ ] Seed de démo réaliste : 1 zone pilote (région du Cavally/Guémon), 2 coopératives, ~40 producteurs, ~60 parcelles dont plusieurs en zone à risque et 1 cas de déforestation post‑2020 net
-- [ ] Smoke test e2e : `scripts/smoke.sh` (login → créer parcelle → analyser → générer rapport → télécharger PDF)
-- [ ] `docker compose up` à froid : stack complète verte en < 3 min
-- [ ] Revue accessibilité web (contraste AA, navigation clavier, `prefers-reduced-motion`)
-- [ ] Relecture des 6 docs : toutes les cases pertinentes cochées
-- [ ] Merge `develop → preprod` (CI verte) puis `preprod → prod` ; tags `v1.0.0-preprod`, `v1.0.0`
-- [ ] README : badges CI, captures d'écran, lien démo
+- [x] Seed de démo curated (`flask seed-demo`) : zone pilote Cavally, 2 coopératives, 24 producteurs, 41 parcelles ; `CURATED_BY_CODE` fige des cas nets par code → **20 conformes / 12 à vérifier / 9 non conformes**, dont parcelles recoupant les forêts classées du Cavally et du Goin‑Débé + coupes post‑2020
+- [x] Smoke test e2e : `scripts/smoke.sh` (login → créer parcelle → analyser → générer rapport → télécharger PDF)
+- [x] `docker compose up` à froid : stack complète verte en < 3 min
+- [x] Accessibilité web : `focus-visible:ring` sur tous les contrôles, `aria-label` sur les icônes, thème sombre contrasté, `prefers-reduced-motion` respecté (entrées critiques en `transition` CSS jamais bloquantes) ; audit Lighthouse formel non exécuté ici
+- [x] Relecture des 6 docs : toutes les cases pertinentes cochées
+- [x] Merge `develop → preprod` (CI verte) puis `preprod → prod` ; tags `v1.0.0-preprod`, `v1.0.0`
+- [x] README : badges CI, captures d'écran, lien démo
 
 **Definition of Done :** les 3 branches à jour, tag `v1.0.0` sur `prod`, `scripts/smoke.sh` vert.
 

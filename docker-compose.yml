@@ -1,0 +1,137 @@
+# Stack applicative CacaoSat.
+#   docker compose up --build          -> dev intégré (backend + services d'appui)
+#   docker compose --profile prod up   -> profil production (gunicorn)
+# Le web, le proxy Nginx et l'observabilité sont ajoutés au Lot 9.
+name: cacaosat
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: cacaosat
+      POSTGRES_PASSWORD: cacaosat
+      POSTGRES_DB: cacaosat
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cacaosat -d cacaosat"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    restart: unless-stopped
+
+  minio-setup:
+    image: minio/mc:RELEASE.2024-10-08T09-37-26Z
+    depends_on: [minio]
+    restart: "no"
+    entrypoint: >
+      /bin/sh -c "
+      until mc alias set local http://minio:9000 minioadmin minioadmin; do sleep 1; done &&
+      mc mb -p local/cacaosat && mc anonymous set download local/cacaosat &&
+      echo 'bucket cacaosat prêt'"
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      FLASK_CONFIG: production
+      WEB_CONCURRENCY: "${WEB_CONCURRENCY:-4}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+      SECRET_KEY: ${SECRET_KEY:-compose-secret-change-me}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-compose-jwt-secret-change-me}
+      DATABASE_URL: postgresql+psycopg://cacaosat:cacaosat@db:5432/cacaosat
+      REDIS_URL: redis://redis:6379/0
+      RATELIMIT_STORAGE_URI: redis://redis:6379/1
+      CORS_ORIGINS: http://localhost:5173,http://localhost
+      MAIL_SERVER: mailhog
+      MAIL_PORT: "1025"
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: cacaosat
+      SEED_ON_START: "1"
+      SEED_DEMO_ON_START: "${SEED_DEMO_ON_START:-0}"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api/v1}
+    depends_on: [backend]
+    expose:
+      - "80"
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:1.27-alpine
+    depends_on: [web, backend, mailhog]
+    ports:
+      - "${PROXY_PORT:-80}:80"
+    volumes:
+      - ./infra/nginx/proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+  # --- Observabilité (profil optionnel) ---
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: ["observability"]
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-cacaosat}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  miniodata:
+  grafanadata:

@@ -1,0 +1,60 @@
+name: cacaosat
+description: "CacaoSat — collecte terrain hors-ligne des parcelles cacaoyères (conformité EUDR)."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # État
+  flutter_riverpod: ^2.6.1
+
+  # Réseau
+  dio: ^5.7.0
+  connectivity_plus: ^6.1.0
+
+  # Base locale hors-ligne
+  drift: ^2.21.0
+  sqlite3_flutter_libs: ^0.5.26
+  path_provider: ^2.1.5
+  path: ^1.9.0
+
+  # Navigation
+  go_router: ^14.6.2
+
+  # Sécurité / stockage
+  flutter_secure_storage: ^9.2.2
+
+  # Géo / carte / GPS
+  geolocator: ^13.0.2
+  latlong2: ^0.9.1
+  flutter_map: ^7.0.2
+
+  # Sync en arrière-plan + notifications
+  workmanager: ^0.5.2
+  flutter_local_notifications: ^18.0.1
+
+  # UI
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.16
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  permission_handler: ^11.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.13
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

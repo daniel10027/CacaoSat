@@ -1,0 +1,7 @@
+Migrations de base de données pilotées par Flask-Migrate (Alembic).
+
+  flask db migrate -m "message"   # génère une révision depuis les modèles
+  flask db upgrade                # applique
+  flask db downgrade -1           # revient d'une révision
+
+L'extension PostGIS est activée par la première migration.
