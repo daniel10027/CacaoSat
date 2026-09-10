@@ -27,8 +27,8 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 | 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): socle React + design system CI + auth` |
 | 5 | Web — landing page immersive (cacao en orbite) | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): landing immersive (cacao en orbite)` |
 | 6 | Web — dashboards conformité (carte, KPIs, rapports, alertes) | [FRONTEND.md](docs/FRONTEND.md) | `[x]` | `feat(web): dashboards de conformité` |
-| 7 | Mobile — socle Flutter (thème, DB locale, auth, nav) | [MOBILE.md](docs/MOBILE.md) | `[ ]` | — |
-| 8 | Mobile — collecte terrain hors‑ligne + sync différée | [MOBILE.md](docs/MOBILE.md) | `[ ]` | — |
+| 7 | Mobile — socle Flutter (thème, DB locale, auth, nav) | [MOBILE.md](docs/MOBILE.md) | `[x]` | `feat(mobile): app Flutter de collecte terrain hors-ligne` |
+| 8 | Mobile — collecte terrain hors‑ligne + sync différée | [MOBILE.md](docs/MOBILE.md) | `[x]` | (idem — Lots 7 & 8 livrés ensemble) |
 | 9 | Infra — Docker Compose, CI/CD, `dev.sh`, observabilité | [INFRA.md](docs/INFRA.md) | `[ ]` | — |
 | 10 | Pitch — deck 5 min PPTX + PDF | ce fichier | `[ ]` | — |
 | 11 | Durcissement, seed démo, release preprod/prod | ce fichier | `[ ]` | — |
