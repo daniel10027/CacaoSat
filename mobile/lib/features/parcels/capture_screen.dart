@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/nav.dart';
 import '../../core/theme.dart';
+import '../../core/tile_cache.dart';
 import '../../domain/geo.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
@@ -23,6 +24,7 @@ class CaptureScreen extends ConsumerStatefulWidget {
 
 class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   final _map = MapController();
+  final _tiles = CachedTileProvider();
   final List<LatLng> _points = [];
   final List<List<LatLng>> _protectedRings = [];
 
@@ -31,18 +33,74 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   Position? _current;
   bool _walking = false;
   bool _saving = false;
+  Timer? _draftTimer;
 
   @override
   void initState() {
     super.initState();
     _initLocation();
     _loadProtected();
+    _offerDraftResume();
   }
 
   @override
   void dispose() {
     _posSub?.cancel();
+    _draftTimer?.cancel();
+    _tiles.dispose();
     super.dispose();
+  }
+
+  Future<void> _offerDraftResume() async {
+    final draft = await ref.read(referenceRepositoryProvider).loadDraft();
+    if (draft == null || !mounted) return;
+    final resume = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Reprendre la capture ?'),
+        content: Text('Un relevé de ${draft.points.length} sommets a été interrompu.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Recommencer'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Reprendre'),
+          ),
+        ],
+      ),
+    );
+    if (resume == true && mounted) {
+      setState(() {
+        _points
+          ..clear()
+          ..addAll(draft.points.map((c) => LatLng(c[0], c[1])));
+        _mode = CaptureMode.values.firstWhere(
+          (m) => m.name == draft.mode,
+          orElse: () => CaptureMode.vertices,
+        );
+      });
+      if (_points.isNotEmpty) _map.move(_points.first, 17);
+    } else {
+      await ref.read(referenceRepositoryProvider).clearDraft();
+    }
+  }
+
+  void _persistDraft() {
+    _draftTimer?.cancel();
+    _draftTimer = Timer(const Duration(milliseconds: 600), () {
+      ref.read(referenceRepositoryProvider).saveDraft(
+            _points.map((p) => [p.latitude, p.longitude]).toList(),
+            _mode.name,
+          );
+    });
+  }
+
+  /// setState + sauvegarde différée du brouillon.
+  void _editPoints(VoidCallback mutate) {
+    setState(mutate);
+    _persistDraft();
   }
 
   Future<void> _loadProtected() async {
@@ -56,13 +114,17 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   }
 
   Future<void> _initLocation() async {
-    var perm = await Geolocator.checkPermission();
-    if (perm == LocationPermission.denied) {
-      perm = await Geolocator.requestPermission();
-    }
-    if (perm == LocationPermission.denied ||
-        perm == LocationPermission.deniedForever) {
-      return;
+    try {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        return;
+      }
+    } catch (_) {
+      return; // plateforme sans GPS (test / émulateur) : capture manuelle possible
     }
     try {
       final pos = await Geolocator.getCurrentPosition();
@@ -70,7 +132,15 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       setState(() => _current = pos);
       _map.move(LatLng(pos.latitude, pos.longitude), 17);
     } catch (_) {}
-    _posSub = Geolocator.getPositionStream(
+    try {
+      _posSub = _positionStream();
+    } catch (_) {
+      // pas de flux GPS : les modes « sommets » (GPS ponctuel) et « manuel » restent utilisables
+    }
+  }
+
+  StreamSubscription<Position> _positionStream() {
+    return Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 3,
@@ -82,7 +152,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
         final ll = LatLng(pos.latitude, pos.longitude);
         if (_points.isEmpty ||
             const Distance().as(LengthUnit.Meter, _points.last, ll) > 4) {
-          setState(() => _points.add(ll));
+          _editPoints(() => _points.add(ll));
         }
       }
     });
@@ -96,7 +166,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
   void _addVertexAtGps() {
     final p = _current;
     if (p == null) return;
-    setState(() => _points.add(LatLng(p.latitude, p.longitude)));
+    _editPoints(() => _points.add(LatLng(p.latitude, p.longitude)));
   }
 
   Future<void> _finish() async {
@@ -124,7 +194,11 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     );
     if (!mounted) return;
     setState(() => _saving = false);
-    if (saved == true) context.pop();
+    if (saved == true) {
+      await ref.read(referenceRepositoryProvider).clearDraft();
+      unawaited(_tiles.pruneIfNeeded());
+      if (mounted) safePop(context);
+    }
   }
 
   void _snack(String m) => ScaffoldMessenger.of(context)
@@ -143,7 +217,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
           TextButton(
             onPressed: _points.isEmpty
                 ? null
-                : () => setState(_points.clear),
+                : () => _editPoints(_points.clear),
             child: const Text('Effacer'),
           ),
         ],
@@ -161,7 +235,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                     initialCenter: center,
                     initialZoom: 17,
                     onTap: _mode == CaptureMode.manual
-                        ? (_, ll) => setState(() => _points.add(ll))
+                        ? (_, ll) => _editPoints(() => _points.add(ll))
                         : null,
                   ),
                   children: [
@@ -170,6 +244,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'ci.cacaosat',
                       maxZoom: 19,
+                      tileProvider: _tiles,
                     ),
                     if (_protectedRings.isNotEmpty)
                       PolygonLayer(
@@ -207,7 +282,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                             height: 26,
                             child: GestureDetector(
                               onTap: _mode == CaptureMode.manual
-                                  ? () => setState(() => _points.removeAt(i))
+                                  ? () => _editPoints(() => _points.removeAt(i))
                                   : null,
                               child: Container(
                                 decoration: BoxDecoration(
@@ -265,7 +340,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
             onAddVertex: _addVertexAtGps,
             onUndo: _points.isEmpty
                 ? null
-                : () => setState(() => _points.removeLast()),
+                : () => _editPoints(() => _points.removeLast()),
             onFinish: _finish,
           ),
         ],

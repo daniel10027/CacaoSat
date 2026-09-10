@@ -16,6 +16,25 @@ class ReferenceRepository {
 
   Future<DateTime?> get lastBootstrap => _ref.fetchedAt('bootstrap');
 
+  // --- Brouillon de capture (reprise après interruption) ---
+  static const _draftKey = 'capture_draft';
+
+  Future<void> saveDraft(List<List<double>> latLngPoints, String mode) =>
+      _ref.put(_draftKey, jsonEncode({'points': latLngPoints, 'mode': mode}));
+
+  Future<({List<List<double>> points, String mode})?> loadDraft() async {
+    final raw = await _ref.get(_draftKey);
+    if (raw == null) return null;
+    final m = jsonDecode(raw) as Map<String, dynamic>;
+    final pts = (m['points'] as List)
+        .map<List<double>>((e) => [(e as List)[0] as double, e[1] as double])
+        .toList();
+    if (pts.isEmpty) return null;
+    return (points: pts, mode: m['mode'] as String? ?? 'vertices');
+  }
+
+  Future<void> clearDraft() => _ref.put(_draftKey, jsonEncode({'points': []}));
+
   Future<Map<String, dynamic>?> cachedBootstrap() async {
     final raw = await _ref.get('bootstrap');
     return raw == null ? null : jsonDecode(raw) as Map<String, dynamic>;

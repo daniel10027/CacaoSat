@@ -54,6 +54,11 @@ miniodata/
 
 # --- Generated pitch exports (keep sources, ignore scratch) ---
 pitch/*.tmp
+~$*
+.~lock.*
+
+# --- DB backups (make backup-db) ---
+backups/
 
 # Playwright
 web/playwright-report/

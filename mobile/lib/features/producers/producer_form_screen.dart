@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../core/nav.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
 
@@ -47,7 +47,7 @@ class _ProducerFormScreenState extends ConsumerState<ProducerFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Producteur enregistré localement')),
     );
-    context.pop();
+    safePop(context);
   }
 
   @override
