@@ -21,7 +21,7 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 | Lot | Titre | Doc de détail | Statut | Push |
 |-----|-------|---------------|--------|------|
 | 0 | Fondations du dépôt | ce fichier | `[x]` | `chore: bootstrap monorepo + tracking docs` |
-| 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
+| 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): socle Flask + PostGIS + auth JWT` |
 | 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
 | 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
 | 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
@@ -49,6 +49,24 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 - [x] `git push` des 4 branches `main` / `develop` / `preprod` / `prod` (credential helper macOS actif)
 
 **Definition of Done :** `git log` montre le commit de bootstrap, `git branch` liste `develop/preprod/prod`, les 6 docs existent. ✅ **Lot 0 terminé** — 4 branches sur `origin`, travail en cours sur `develop`.
+
+---
+
+## Lot 1 — Backend, socle  `[x]`
+
+Détail des tâches : [docs/BACKEND.md § Lot 1](docs/BACKEND.md). Résumé livré :
+
+- [x] Application factory Flask (`create_app`), configs Dev/Test/Prod, logs JSON, enveloppe d'erreurs uniforme
+- [x] 10 modèles SQLAlchemy + PostGIS (`Cooperative, User, Producer, Parcel, AnalysisRun, ComplianceScore, ComplianceReport, Alert, SyncBatch, AuditLog`)
+- [x] Migration Alembic initiale **réversible** (up/down testés), extension PostGIS activée, index GiST sur `parcels.geometry`
+- [x] Auth : hachage **argon2**, JWT access/refresh, claims `role`/`cooperative_id`, `@roles_required`, rate‑limit login
+- [x] Endpoints : `/health`, `/health/ready` (DB+Redis), `/metrics` (Prometheus), `/auth/login|refresh|me`, `/openapi.json`
+- [x] `flask seed` (9 comptes, 2 coopératives) + `flask seed-demo` (24 producteurs, 41 parcelles géolocalisées)
+- [x] `Dockerfile` multi‑stage non‑root + `entrypoint.sh` (attente DB → `db upgrade` → seed) + `gunicorn.conf.py`
+- [x] `infra/docker-compose.dev.yml` (PostGIS, Redis, MailHog, MinIO) + `docker-compose.yml` racine (db, redis, backend, …)
+- [x] Suite **pytest : 20 tests verts, couverture 85 %**, `ruff check` propre
+
+**Definition of Done :** ✅ `make test` vert (85 %), `docker compose up --build backend db` opérationnel, `flask db upgrade`/`downgrade` réversibles, `/health/ready`=200, `/auth/login`→JWT.
 
 ---
 

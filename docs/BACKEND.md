@@ -8,67 +8,67 @@
 
 ---
 
-## Statut du lot : `[ ]` Lot 1 · `[ ]` Lot 2 · `[ ]` Lot 3
+## Statut du lot : `[x]` Lot 1 (terminé) · `[ ]` Lot 2 · `[ ]` Lot 3
 
 ---
 
 ## Lot 1 — Socle backend
 
 ### 1.1 Projet & configuration
-- [ ] `backend/pyproject.toml` — métadonnées, dépendances, config Ruff + pytest
-- [ ] `backend/requirements.txt` + `requirements-dev.txt` (versions épinglées)
-- [ ] `backend/app/__init__.py` — **application factory** `create_app(config_name)`
-- [ ] `backend/app/config.py` — classes `BaseConfig / DevConfig / TestConfig / ProdConfig`, lecture `.env` via `python-dotenv`
-- [ ] `backend/.env.example` — `FLASK_ENV`, `DATABASE_URL`, `JWT_SECRET_KEY`, `REDIS_URL`, `CORS_ORIGINS`, `MAIL_*`, `S3_*`, `MOCK_SEED`
-- [ ] `backend/app/extensions.py` — instances `db`, `migrate`, `jwt`, `ma`, `cors`, `scheduler`
-- [ ] `backend/wsgi.py` — point d'entrée Gunicorn
-- [ ] `backend/app/errors.py` — handlers JSON uniformes (`400/401/403/404/409/422/500`), enveloppe `{error: {code, message, details}}`
-- [ ] `backend/app/logging.py` — logs structurés JSON (stdout), niveau par env
+- [x] `backend/pyproject.toml` — métadonnées, dépendances, config Ruff + pytest
+- [x] `backend/requirements.txt` + `requirements-dev.txt` (versions épinglées)
+- [x] `backend/app/__init__.py` — **application factory** `create_app(config_name)`
+- [x] `backend/app/config.py` — classes `BaseConfig / DevConfig / TestConfig / ProdConfig`, lecture `.env` via `python-dotenv`
+- [x] `backend/.env.example` — `FLASK_ENV`, `DATABASE_URL`, `JWT_SECRET_KEY`, `REDIS_URL`, `CORS_ORIGINS`, `MAIL_*`, `S3_*`, `MOCK_SEED`
+- [x] `backend/app/extensions.py` — instances `db`, `migrate`, `jwt`, `ma`, `cors`, `scheduler`
+- [x] `backend/wsgi.py` — point d'entrée Gunicorn
+- [x] `backend/app/errors.py` — handlers JSON uniformes (`400/401/403/404/409/422/500`), enveloppe `{error: {code, message, details}}`
+- [x] `backend/app/logging.py` — logs structurés JSON (stdout), niveau par env
 
 ### 1.2 Base de données géospatiale
-- [ ] Connexion PostGIS + activation extension `postgis` via migration Alembic
-- [ ] `backend/app/models/base.py` — `TimestampMixin`, `UUIDMixin`, `SoftDeleteMixin`
-- [ ] `models/cooperative.py` — `Cooperative(id, name, code, region, department, contact_name, contact_phone, contact_email, created_at)`
-- [ ] `models/user.py` — `User(id, email, password_hash, full_name, role, cooperative_id, is_active)` ; rôles : `agent | manager | exporter | regulator | admin`
-- [ ] `models/producer.py` — `Producer(id, cooperative_id, external_ref, full_name, national_id, gender, village, phone, registered_at)`
-- [ ] `models/parcel.py` — `Parcel(id, code, producer_id, cooperative_id, geometry: Geometry(POLYGON,4326), area_ha, centroid, planting_year, crop, gps_accuracy_m, collection_method, collected_by, collected_at, source, status)` ; index GIST sur `geometry`
-- [ ] `models/analysis_run.py` — `AnalysisRun(id, parcel_id, provider_versions: JSONB, forest_cover_2020_pct, forest_cover_current_pct, forest_loss_ha, loss_events: JSONB, ndvi_series: JSONB, protected_area_overlap_ha, deforestation_detected: bool, confidence, created_at)`
-- [ ] `models/compliance_score.py` — `ComplianceScore(id, parcel_id, analysis_run_id, score, risk_level, eudr_status, factors: JSONB, computed_at)` ; `risk_level: low|medium|high` ; `eudr_status: compliant|at_risk|non_compliant`
-- [ ] `models/compliance_report.py` — `ComplianceReport(id, cooperative_id, title, period_start, period_end, parcel_ids: JSONB, summary: JSONB, pdf_key, geojson_key, content_hash, generated_by, generated_at)`
-- [ ] `models/alert.py` — `Alert(id, parcel_id, type, severity, detected_at, area_ha, geometry, message, acknowledged, acknowledged_by, acknowledged_at)` ; `type: new_deforestation|protected_encroachment|data_gap`
-- [ ] `models/sync_batch.py` — `SyncBatch(id, device_id, user_id, received_at, item_count, accepted, rejected, errors: JSONB, status)`
-- [ ] `models/audit_log.py` — `AuditLog(id, actor_id, action, entity_type, entity_id, payload: JSONB, created_at, ip)`
-- [ ] `backend/migrations/` — migration initiale générée + relue (types géo, index, FK, enums)
+- [x] Connexion PostGIS + activation extension `postgis` via migration Alembic
+- [x] `backend/app/models/base.py` — `TimestampMixin`, `UUIDMixin`, `SoftDeleteMixin`
+- [x] `models/cooperative.py` — `Cooperative(id, name, code, region, department, contact_name, contact_phone, contact_email, created_at)`
+- [x] `models/user.py` — `User(id, email, password_hash, full_name, role, cooperative_id, is_active)` ; rôles : `agent | manager | exporter | regulator | admin`
+- [x] `models/producer.py` — `Producer(id, cooperative_id, external_ref, full_name, national_id, gender, village, phone, registered_at)`
+- [x] `models/parcel.py` — `Parcel(id, code, producer_id, cooperative_id, geometry: Geometry(POLYGON,4326), area_ha, centroid, planting_year, crop, gps_accuracy_m, collection_method, collected_by, collected_at, source, status)` ; index GIST sur `geometry`
+- [x] `models/analysis_run.py` — `AnalysisRun(id, parcel_id, provider_versions: JSONB, forest_cover_2020_pct, forest_cover_current_pct, forest_loss_ha, loss_events: JSONB, ndvi_series: JSONB, protected_area_overlap_ha, deforestation_detected: bool, confidence, created_at)`
+- [x] `models/compliance_score.py` — `ComplianceScore(id, parcel_id, analysis_run_id, score, risk_level, eudr_status, factors: JSONB, computed_at)` ; `risk_level: low|medium|high` ; `eudr_status: compliant|at_risk|non_compliant`
+- [x] `models/compliance_report.py` — `ComplianceReport(id, cooperative_id, title, period_start, period_end, parcel_ids: JSONB, summary: JSONB, pdf_key, geojson_key, content_hash, generated_by, generated_at)`
+- [x] `models/alert.py` — `Alert(id, parcel_id, type, severity, detected_at, area_ha, geometry, message, acknowledged, acknowledged_by, acknowledged_at)` ; `type: new_deforestation|protected_encroachment|data_gap`
+- [x] `models/sync_batch.py` — `SyncBatch(id, device_id, user_id, received_at, item_count, accepted, rejected, errors: JSONB, status)`
+- [x] `models/audit_log.py` — `AuditLog(id, actor_id, action, entity_type, entity_id, payload: JSONB, created_at, ip)`
+- [x] `backend/migrations/` — migration initiale générée + relue (types géo, index, FK, enums)
 
 ### 1.3 Authentification & autorisation
-- [ ] `app/api/auth.py` — `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me`
-- [ ] Hash mots de passe `argon2` (via `argon2-cffi`)
-- [ ] JWT access (15 min) + refresh (7 j), claims `role`, `cooperative_id`
-- [ ] `app/security.py` — décorateurs `@roles_required(...)`, `@same_cooperative_or_regulator`
-- [ ] Rate‑limit `POST /auth/login` (Flask‑Limiter, backend mémoire en dev / Redis en prod)
+- [x] `app/api/auth.py` — `POST /auth/login`, `POST /auth/refresh`, `GET /auth/me`
+- [x] Hash mots de passe `argon2` (via `argon2-cffi`)
+- [x] JWT access (15 min) + refresh (7 j), claims `role`, `cooperative_id`
+- [x] `app/security.py` — décorateurs `@roles_required(...)`, helper `scope_cooperative_id()` (portée coopérative / nationale)
+- [x] Rate‑limit `POST /auth/login` (Flask‑Limiter, backend mémoire en dev / Redis en prod)
 
 ### 1.4 Schémas & validation
-- [ ] `app/schemas/` — Marshmallow pour chaque ressource (dump + load), validation GeoJSON polygone (anneau fermé, ≥ 4 points, surface > 0, dans l'emprise Côte d'Ivoire)
-- [ ] Helper `app/geo.py` — parse/valide GeoJSON, calcul `area_ha` (repro EPSG:32630), `centroid`, simplification tolérante
+- [x] `app/schemas/` amorcé — Marshmallow `auth` (login/token/user). Les schémas par ressource (cooperative, producer, parcel, …) sont créés au **Lot 2** avec leurs endpoints.
+- [x] Helper `app/geo.py` — parse/valide GeoJSON (polygone valide, non auto‑intersectant, dans l'emprise CI, surface plausible), calcul `area_ha` (repro EPSG:32630), `centroid`, `WKTElement`, `FeatureCollection`, `parse_bbox`
 
 ### 1.5 Santé, seed, outillage
-- [ ] `GET /health` (liveness) + `GET /health/ready` (DB + Redis) + `GET /metrics` (compteurs Prometheus texte)
-- [ ] `backend/seeds/seed.py` + `flask seed` (CLI) — 1 admin, 1 régulateur, 2 coopératives, 1 manager + 2 agents chacune, données mock chargées
-- [ ] `backend/seeds/demo_zone.geojson` — parcelles de la zone pilote
-- [ ] `flask routes` documenté ; `backend/README.md` (run local, migrations, seed, tests)
+- [x] `GET /health` (liveness) + `GET /health/ready` (DB + Redis) + `GET /metrics` (compteurs Prometheus texte)
+- [x] `backend/seeds/seed.py` + `flask seed` (CLI) — 1 admin, 1 régulateur, 2 coopératives, 1 manager + 2 agents chacune, données mock chargées
+- [x] `flask seed-demo` — zone pilote (Cavally/Guiglo) : 24 producteurs + 41 parcelles géolocalisées générées de façon déterministe (le GeoJSON figé arrive au Lot 11)
+- [x] `backend/README.md` (run local, migrations, seed, tests, comptes de démo)
 
 ### 1.6 Conteneurisation
-- [ ] `backend/Dockerfile` — multi‑stage (builder deps → runtime slim), user non‑root, `HEALTHCHECK`, `CMD gunicorn -c gunicorn.conf.py wsgi:app`
-- [ ] `backend/gunicorn.conf.py` — workers = `2*cpu+1`, timeout, access log JSON
-- [ ] `backend/.dockerignore`
-- [ ] `backend/entrypoint.sh` — attend la DB, applique `flask db upgrade`, (option) `flask seed`, puis exec CMD
+- [x] `backend/Dockerfile` — multi‑stage (builder deps → runtime slim), user non‑root, `HEALTHCHECK`, `CMD gunicorn -c gunicorn.conf.py wsgi:app`
+- [x] `backend/gunicorn.conf.py` — workers = `2*cpu+1`, timeout, access log JSON
+- [x] `backend/.dockerignore`
+- [x] `backend/entrypoint.sh` — attend la DB, applique `flask db upgrade`, (option) `flask seed`, puis exec CMD
 
 ### 1.7 Tests (Lot 1)
-- [ ] `backend/tests/conftest.py` — app de test, DB éphémère (PostGIS via testcontainers **ou** base `_test` dédiée), client, factories (`factory_boy`)
-- [ ] `tests/test_auth.py`, `tests/test_health.py`, `tests/test_models_geo.py` (round‑trip polygone, area_ha, index GIST)
-- [ ] `make test` → `pytest -q --cov=app --cov-fail-under=80`
+- [x] `backend/tests/conftest.py` — app de test, base `cacaosat_test` auto‑créée (+ extension PostGIS), nettoyage par test, fixtures `seeded` / `auth_header`
+- [x] `tests/test_auth.py`, `tests/test_health.py`, `tests/test_models_geo.py` (round‑trip polygone, area_ha, index GiST), `tests/test_config.py`
+- [x] `make test` → `pytest --cov=app --cov-fail-under=80` — **20 tests verts, couverture 85 %**
 
-**Definition of Done Lot 1 :** `docker compose up backend db` démarre, migrations appliquées, `flask seed` peuple la base, `GET /health/ready` = 200, `POST /auth/login` renvoie un JWT, `make test` vert.
+**Definition of Done Lot 1 :** ✅ `docker compose up --build backend db` démarre, migrations Alembic appliquées (up + down réversibles), `flask seed` + `flask seed-demo` peuplent la base, `GET /health/ready` = 200, `POST /auth/login` renvoie un JWT, `make test` vert (85 %), `ruff check` propre.
 
 ---
 
@@ -232,3 +232,4 @@ MOCK_SEED=42
 | Date | Lot | Commit | Note |
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | squelette `backend/` créé |
+| 2026-09-10 | 1 | `feat(backend): socle Flask + PostGIS + auth JWT` | app factory, 10 modèles PostGIS, migration Alembic réversible, auth argon2/JWT, health/ready/metrics, seed + seed-demo, Dockerfile, 20 tests (cov 85 %) |
