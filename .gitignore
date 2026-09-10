@@ -1,0 +1,56 @@
+# --- OS / editors ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+!.vscode/extensions.json
+
+# --- Runtime / logs ---
+.dev/
+*.log
+logs/
+
+# --- Python / backend ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+backend/.env
+backend/instance/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- Node / web ---
+node_modules/
+web/dist/
+web/.env
+web/.env.local
+*.tsbuildinfo
+.eslintcache
+
+# --- Flutter / mobile ---
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/build/
+mobile/.env
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/**/GeneratedPluginRegistrant.*
+*.g.dart.bak
+
+# --- Docker / infra ---
+infra/**/data/
+pgdata/
+miniodata/
+
+# --- Generated pitch exports (keep sources, ignore scratch) ---
+pitch/*.tmp
