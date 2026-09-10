@@ -31,7 +31,7 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 | 8 | Mobile — collecte terrain hors‑ligne + sync différée | [MOBILE.md](docs/MOBILE.md) | `[x]` | (idem — Lots 7 & 8 livrés ensemble) |
 | 9 | Infra — Docker Compose, CI/CD, `dev.sh`, observabilité | [INFRA.md](docs/INFRA.md) | `[x]` | `feat(infra): docker-compose complet + CI/CD + scripts dev` |
 | 10 | Pitch — deck 5 min PPTX + PDF | ce fichier | `[x]` | `feat(pitch): deck 5 min PPTX + PDF (python-pptx / reportlab)` |
-| 11 | Durcissement, seed démo, release preprod/prod | ce fichier | `[ ]` | — |
+| 11 | Durcissement, seed démo, release preprod/prod | ce fichier | `[x]` | `chore(release): durcissement + seed démo curated + v1.0.0` |
 
 ---
 
@@ -128,15 +128,15 @@ Détail : [docs/BACKEND.md § Lot 3](docs/BACKEND.md). Résumé livré :
 
 ---
 
-## Lot 11 — Durcissement & release  `[ ]`
+## Lot 11 — Durcissement & release  `[x]`
 
-- [ ] Seed de démo réaliste : 1 zone pilote (région du Cavally/Guémon), 2 coopératives, ~40 producteurs, ~60 parcelles dont plusieurs en zone à risque et 1 cas de déforestation post‑2020 net
-- [ ] Smoke test e2e : `scripts/smoke.sh` (login → créer parcelle → analyser → générer rapport → télécharger PDF)
-- [ ] `docker compose up` à froid : stack complète verte en < 3 min
-- [ ] Revue accessibilité web (contraste AA, navigation clavier, `prefers-reduced-motion`)
-- [ ] Relecture des 6 docs : toutes les cases pertinentes cochées
-- [ ] Merge `develop → preprod` (CI verte) puis `preprod → prod` ; tags `v1.0.0-preprod`, `v1.0.0`
-- [ ] README : badges CI, captures d'écran, lien démo
+- [x] Seed de démo curated (`flask seed-demo`) : zone pilote Cavally, 2 coopératives, 24 producteurs, 41 parcelles ; `CURATED_BY_CODE` fige des cas nets par code → **20 conformes / 12 à vérifier / 9 non conformes**, dont parcelles recoupant les forêts classées du Cavally et du Goin‑Débé + coupes post‑2020
+- [x] Smoke test e2e : `scripts/smoke.sh` (login → créer parcelle → analyser → générer rapport → télécharger PDF)
+- [x] `docker compose up` à froid : stack complète verte en < 3 min
+- [x] Accessibilité web : `focus-visible:ring` sur tous les contrôles, `aria-label` sur les icônes, thème sombre contrasté, `prefers-reduced-motion` respecté (entrées critiques en `transition` CSS jamais bloquantes) ; audit Lighthouse formel non exécuté ici
+- [x] Relecture des 6 docs : toutes les cases pertinentes cochées
+- [x] Merge `develop → preprod` (CI verte) puis `preprod → prod` ; tags `v1.0.0-preprod`, `v1.0.0`
+- [x] README : badges CI, captures d'écran, lien démo
 
 **Definition of Done :** les 3 branches à jour, tag `v1.0.0` sur `prod`, `scripts/smoke.sh` vert.
 
