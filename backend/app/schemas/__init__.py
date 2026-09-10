@@ -1,0 +1,1 @@
+"""Schémas Marshmallow (validation + sérialisation)."""

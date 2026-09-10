@@ -5,7 +5,7 @@
 > Projet candidat · **Ivoire Spacehack 2026** · Africa Space Expo / ASPEX · Abidjan · 24–26 septembre 2026
 
 <p align="center">
-  <img src="web/src/assets/logo-cacaosat.svg" alt="CacaoSat — un cacao en orbite" width="180" />
+  <img src="web/src/assets/logo-cacaosat.png" alt="CacaoSat — un cacao en orbite" width="180" />
 </p>
 
 ---

@@ -1,0 +1,39 @@
+[project]
+name = "cacaosat-backend"
+version = "0.1.0"
+description = "CacaoSat — API de traçabilité géospatiale du cacao ivoirien (conformité EUDR)"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+  { name = "Akandji Timothé" },
+  { name = "Elie Konan" },
+  { name = "Daniel Guedegbe" },
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+src = ["app", "tests", "seeds"]
+exclude = ["migrations/versions", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4", "SIM", "PL"]
+ignore = ["PLR0913", "PLR2004", "B008", "PLR0912", "PLR0915", "SIM108"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "seeds", "tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["PLR2004", "S101"]
+"seeds/*" = ["PLR0915"]
+"migrations/*" = ["E501", "F401", "I001"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=app --cov-report=term-missing"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+branch = true
+omit = ["app/openapi.py", "*/__init__.py"]
