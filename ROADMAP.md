@@ -46,9 +46,9 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 - [x] `docs/BACKEND.md`, `docs/FRONTEND.md`, `docs/MOBILE.md`, `docs/INFRA.md` — listes de tâches détaillées
 - [x] `git init`, commit initial sur `main`, création des branches `develop`, `preprod`, `prod`
 - [x] `git remote add origin https://github.com/daniel10027/CacaoSat.git`
-- [ ] 🔒 `git push` des 4 branches — **nécessite `gh auth login` par l'utilisateur** (voir « Accès GitHub » plus bas)
+- [x] `git push` des 4 branches `main` / `develop` / `preprod` / `prod` (credential helper macOS actif)
 
-**Definition of Done :** `git log` montre le commit de bootstrap, `git branch` liste `develop/preprod/prod`, les 6 docs existent.
+**Definition of Done :** `git log` montre le commit de bootstrap, `git branch` liste `develop/preprod/prod`, les 6 docs existent. ✅ **Lot 0 terminé** — 4 branches sur `origin`, travail en cours sur `develop`.
 
 ---
 
