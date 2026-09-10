@@ -105,15 +105,22 @@ export function NationalMap() {
                 return (
                   <g key={p.key}>
                     {active && (
-                      <motion.circle
-                        cx={p.x}
-                        cy={p.y}
-                        r={14}
-                        fill={color}
-                        opacity={0.25}
-                        animate={{ r: [10, 20, 10], opacity: [0.3, 0, 0.3] }}
-                        transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
-                      />
+                      <circle cx={p.x} cy={p.y} r={10} fill={color} opacity={0.3}>
+                        <animate
+                          attributeName="r"
+                          values="9;20;9"
+                          dur="3s"
+                          begin={`${i * 0.35}s`}
+                          repeatCount="indefinite"
+                        />
+                        <animate
+                          attributeName="opacity"
+                          values="0.35;0;0.35"
+                          dur="3s"
+                          begin={`${i * 0.35}s`}
+                          repeatCount="indefinite"
+                        />
+                      </circle>
                     )}
                     <circle cx={p.x} cy={p.y} r={active ? 5.5 : 3} fill={color} />
                     <text x={p.x + 10} y={p.y + 4} fontSize="9" fill="#F4EAD5" opacity={0.75}>

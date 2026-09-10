@@ -37,7 +37,12 @@ const COLOR = { success: 'text-risk-low', error: 'text-risk-high', info: 'text-c
 export function Toaster() {
   const { toasts, dismiss } = useToast();
   return (
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-80 flex-col gap-2">
+    <div
+      className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-80 flex-col gap-2"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       <AnimatePresence>
         {toasts.map((t) => {
           const Icon = ICON[t.kind];

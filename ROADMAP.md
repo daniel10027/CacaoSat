@@ -133,8 +133,11 @@ Détail : [docs/BACKEND.md § Lot 3](docs/BACKEND.md). Résumé livré :
 - [x] Seed de démo curated (`flask seed-demo`) : zone pilote Cavally, 2 coopératives, 24 producteurs, 41 parcelles ; `CURATED_BY_CODE` fige des cas nets par code → **20 conformes / 12 à vérifier / 9 non conformes**, dont parcelles recoupant les forêts classées du Cavally et du Goin‑Débé + coupes post‑2020
 - [x] Smoke test e2e : `scripts/smoke.sh` (login → créer parcelle → analyser → générer rapport → télécharger PDF)
 - [x] `docker compose up` à froid : stack complète verte en < 3 min
-- [x] Accessibilité web : `focus-visible:ring` sur tous les contrôles, `aria-label` sur les icônes, thème sombre contrasté, `prefers-reduced-motion` respecté (entrées critiques en `transition` CSS jamais bloquantes) ; audit Lighthouse formel non exécuté ici
-- [x] Relecture des 6 docs : toutes les cases pertinentes cochées
+- [x] Accessibilité web : `focus-visible:ring` sur tous les contrôles, `aria-label` sur les icônes, thème sombre contrasté, `prefers-reduced-motion` respecté (entrées critiques en `transition` CSS jamais bloquantes) ; **skip‑link, focus trap `Dialog`, live regions** ; budgets **Lighthouse en CI** (`lighthouserc.json`, a11y ≥ 0,95 / perf ≥ 0,85)
+- [x] Web e2e : **Playwright** (`web/e2e/` — landing sans erreur console, parcours conformité, garde de rôle) avec backend mocké ; **SSE** alertes temps réel branché au dashboard (`lib/sse.ts` + `useAlertStream`)
+- [x] Mobile finitions : icône + splash natifs (drapeau CI), **cache disque des tuiles** (`core/tile_cache.dart`), **reprise de capture** (brouillon persistant), `core/nav.dart` `safePop`, 2 tests widget + `integration_test/offline_flow_test.dart` → `flutter test` **14 verts**
+- [x] Infra finitions : `infra/deploy/fly.toml` (Fly.io), `make backup-db` / `restore-db` (`pg_dump -Fc` / `pg_restore`)
+- [x] Relecture des 6 docs : toutes les cases pertinentes cochées (`scripts/check_docs.py` vert)
 - [x] Merge `develop → preprod` (CI verte) puis `preprod → prod` ; tags `v1.0.0-preprod`, `v1.0.0`
 - [x] README : badges CI, captures d'écran, lien démo
 

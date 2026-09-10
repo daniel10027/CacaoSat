@@ -28,9 +28,31 @@ TLS : placer un `caddy` ou un `nginx` + certbot devant le service `proxy` (port 
 
 | Composant | Option gratuite | Fichier fourni |
 |-----------|-----------------|----------------|
-| API Flask | Render / Railway / Fly.io | `render.yaml` |
+| API Flask | Render / Railway | `render.yaml` |
+| API Flask | Fly.io | `fly.toml` |
 | Web | Netlify / Vercel / GitHub Pages | `netlify.toml` |
 | PostGIS | Neon / Supabase (extension `postgis`) | — |
 
 Ces fichiers sont fournis pour référence ; la démo du hackathon tourne entièrement via
 `docker compose --profile prod`.
+
+### Fly.io (`fly.toml`)
+
+```bash
+fly launch --no-deploy --copy-config --dockerfile backend/Dockerfile
+fly postgres create --name cacaosat-db --region cdg
+fly postgres attach cacaosat-db            # injecte DATABASE_URL
+fly secrets set SECRET_KEY=... JWT_SECRET_KEY=...
+fly deploy                                  # release_command = flask db upgrade
+```
+
+## Sauvegarde / restauration de la base
+
+```bash
+make backup-db                              # -> backups/cacaosat-<horodatage>.dump
+make restore-db FILE=backups/cacaosat-20260910-120000.dump
+```
+
+`backup-db` lance `pg_dump -Fc` dans le conteneur `db` ; `restore-db` rejoue le dump
+avec `pg_restore --clean --if-exists`. Surcharges : `DB_SERVICE`, `DB_USER`, `DB_NAME`,
+`BACKUP_DIR`.
