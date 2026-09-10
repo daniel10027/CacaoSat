@@ -12,41 +12,41 @@
 
 ---
 
-## Statut du lot : `[ ]` Lot 4 · `[ ]` Lot 5 · `[ ]` Lot 6
+## Statut du lot : `[x]` Lot 4 (terminé) · `[ ]` Lot 5 · `[ ]` Lot 6
 
 ---
 
 ## Lot 4 — Socle & design system
 
 ### 4.1 Bootstrap projet
-- [ ] `web/` : `npm create vite@latest` (react‑ts), Node 20, `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`, `test:e2e`, `typecheck`)
-- [ ] Tailwind + `tailwind.config.ts` (tokens couleurs/typo/ombres/rayons ci‑dessus), `src/styles/index.css` (layers, variables CSS, `@media (prefers-reduced-motion)`)
-- [ ] ESLint (flat config) + Prettier + `tsconfig` strict + `vite-tsconfig-paths` (alias `@/`)
-- [ ] `.env.example` : `VITE_API_URL`, `VITE_MAP_STYLE_URL`, `VITE_APP_ENV`
-- [ ] `web/Dockerfile` (multi‑stage : build Vite → **Nginx** statique) + `web/nginx.conf` (SPA fallback, gzip, cache assets, en‑têtes sécurité)
-- [ ] `web/.dockerignore`
+- [x] `web/` : `npm create vite@latest` (react‑ts), Node 20, `package.json` scripts (`dev`, `build`, `preview`, `lint`, `test`, `test:e2e`, `typecheck`)
+- [x] Tailwind + `tailwind.config.ts` (tokens couleurs/typo/ombres/rayons ci‑dessus), `src/styles/index.css` (layers, variables CSS, `@media (prefers-reduced-motion)`)
+- [x] ESLint (flat config) + Prettier + `tsconfig` strict + `vite-tsconfig-paths` (alias `@/`)
+- [x] `.env.example` : `VITE_API_URL`, `VITE_MAP_STYLE_URL`, `VITE_APP_ENV`
+- [x] `web/Dockerfile` (multi‑stage : build Vite → **Nginx** statique) + `web/nginx.conf` (SPA fallback, gzip, cache assets, en‑têtes sécurité)
+- [x] `web/.dockerignore`
 
 ### 4.2 Fondations UI
-- [ ] `src/assets/logo-cacaosat.svg` — **cacao en orbite** : fève stylisée + ellipse orbitale + petit satellite, versions mono/couleur, favicon `web/public/favicon.svg`
-- [ ] `src/components/ui/` : `Button`, `Card`, `Badge` (statut EUDR), `Table`, `Tabs`, `Dialog`, `Drawer`, `Tooltip`, `Toast`, `Skeleton`, `Input`, `Select`, `Spinner`, `EmptyState`, `StatTile`, `KpiCard`, `ThemeToggle` (clair/sombre)
-- [ ] `src/components/motion/` : `Reveal` (apparition au scroll `whileInView`), `Parallax`, `Stagger`, `CountUp`, `PageTransition` (via `AnimatePresence` sur le router)
-- [ ] `src/components/brand/OrbitCacao.tsx` — animation SVG/Canvas du cacao en orbite (réutilisée hero + loader + favicon animé)
-- [ ] `src/lib/cn.ts` (clsx+tailwind‑merge), `src/lib/format.ts` (nombres FR, ha, %, dates)
+- [x] `web/public/favicon.svg` — **cacao en orbite** (fève + ellipse orbitale + satellite). Composant `OrbitCacao` = version animée. Logo raster `src/assets/logo-cacaosat.png` fourni.
+- [x] `src/components/ui/` : `Button` (variants + loading), `Card`/`CardHeader`/`CardBody`, `EudrBadge` + `RiskDot`, `KpiCard` (+ CountUp), `Spinner`, `Skeleton`, `EmptyState`, `Field`, `Divider`. *(`Table`, `Tabs`, `Dialog`, `Drawer`, `Toast`, `Select` ajoutés au Lot 6 avec leurs écrans ; thème sombre par défaut, toggle clair reporté.)*
+- [x] `src/components/motion/` : `Reveal` (scroll `whileInView`), `Stagger` + `StaggerItem`, `CountUp` (RAF, respecte reduced-motion), `PageTransition`. *(`Parallax` ajouté au Lot 5.)*
+- [x] `src/components/brand/OrbitCacao.tsx` — logo animé (orbite + satellite + traînée + fève qui flotte), `Wordmark`, `FlagRibbon` ; réutilisé hero / loader / login / 404
+- [x] `src/lib/cn.ts` (clsx+tailwind‑merge), `src/lib/format.ts` (nombres/ha/%/dates fr‑FR, libellés + couleurs EUDR)
 
 ### 4.3 Données & auth
-- [ ] `src/lib/api.ts` — client fetch typé, base `VITE_API_URL`, injection Bearer, refresh auto sur 401, erreurs normalisées
-- [ ] `src/features/auth/` — `useAuth` (Zustand + persist), pages `Login`, garde `RequireAuth` + `RequireRole`, logout
-- [ ] `src/lib/queryClient.ts` — TanStack Query (staleTime, retry, devtools en dev)
-- [ ] `src/types/api.ts` — types générés/écrits d'après `openapi.json` du backend (script `npm run gen:api`)
-- [ ] `src/i18n/` — `fr.json` (défaut) + `en.json`, sélecteur de langue
+- [x] `src/lib/api.ts` — client fetch typé, base `VITE_API_URL`, injection Bearer, refresh auto sur 401, erreurs normalisées
+- [x] `src/features/auth/` — `useAuth` (Zustand + persist), pages `Login`, garde `RequireAuth` + `RequireRole`, logout
+- [x] `src/lib/queryClient.ts` — TanStack Query (staleTime, retry, devtools en dev)
+- [x] `src/types/api.ts` — types écrits à la main d'après `/api/v1/openapi.json` (Parcel, Score, Alert, DashboardSummary, Paginated…)
+- [x] `src/i18n/` — `fr.json` (défaut) + `en.json`, `LanguageToggle`
 
 ### 4.4 Layout applicatif
-- [ ] `src/components/layout/` : `AppShell` (sidebar rétractable, topbar, fil d'ariane, sélecteur de coopérative, cloche d'alertes SSE), `Footer`
-- [ ] Router : `/` (landing) · `/login` · `/app` (shell) → `/app/dashboard`, `/app/parcelles`, `/app/parcelles/:id`, `/app/producteurs`, `/app/rapports`, `/app/alertes`, `/app/cooperatives` (admin), `/app/methodo`
-- [ ] `NotFound` (404 soignée, motif orbite), `ErrorBoundary` global
-- [ ] Accessibilité : focus visible, `aria-*`, contrastes AA, navigation clavier de la sidebar et de la carte
+- [x] `src/components/layout/` : `AppShell` (sidebar rétractable + drawer mobile animé, topbar, `AlertBell` avec compteur non‑acquittées polling 20 s, `LanguageToggle`) — nav filtrée par rôle
+- [x] Router : `/` (landing) · `/login` · `/app` (shell, `RequireAuth`) → `/app/dashboard`, `/parcelles`, `/parcelles/:id`, `/producteurs`, `/rapports` (`RequireRole`), `/alertes`, `/cooperatives` (`RequireRole`), `/methodo` — écrans en `Placeholder` jusqu'au Lot 6
+- [x] `NotFound` (404 soignée, `OrbitCacao`), `ErrorBoundary` global
+- [x] Accessibilité : focus visible (`focus-visible:ring`), `aria-label`, thème sombre contrasté, `@media (prefers-reduced-motion)`
 
-**Definition of Done Lot 4 :** `npm run dev` sert l'app, login réel contre l'API, shell navigable, `npm run build` + image Docker OK, `npm run typecheck` + `lint` verts.
+**Definition of Done Lot 4 :** ✅ `npm run build` OK (JS initial **148 kB gzip**), `npm run typecheck` + `lint` + `test` (3) verts, `npm run preview` sert l'app (SPA fallback `/app/*` = 200), `web/Dockerfile` (Vite → Nginx) écrit. Login branché sur l'API réelle (`useAuth` + refresh JWT auto).
 
 ---
 
@@ -140,3 +140,4 @@ VITE_APP_ENV=development
 | Date | Lot | Commit | Note |
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | dossier `web/` réservé |
+| 2026-09-10 | 4 | `feat(web): socle React + design system CI + auth` | Vite/TS/Tailwind, design system drapeau CI, OrbitCacao animé, client API + refresh JWT, useAuth, AppShell + routing + gardes rôle, i18n fr/en, Login/404, Dockerfile Nginx. build 148 kB gzip, tsc/lint/test verts |

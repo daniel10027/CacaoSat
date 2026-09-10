@@ -1,0 +1,47 @@
+{
+  "brand": { "tagline": "Le spatial pour bâtir" },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "parcels": "Parcelles",
+    "producers": "Producteurs",
+    "reports": "Rapports",
+    "alerts": "Alertes",
+    "cooperatives": "Coopératives",
+    "methodology": "Méthodologie",
+    "logout": "Se déconnecter"
+  },
+  "auth": {
+    "title": "Connexion",
+    "subtitle": "Accédez au tableau de bord de conformité de votre coopérative.",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "loading": "Connexion…",
+    "error": "Identifiants invalides.",
+    "demo": "Comptes de démonstration"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "retry": "Réessayer",
+    "empty": "Aucune donnée",
+    "search": "Rechercher",
+    "all": "Tous",
+    "close": "Fermer",
+    "download": "Télécharger",
+    "analyze": "Analyser",
+    "generate": "Générer",
+    "acknowledge": "Acquitter",
+    "error": "Une erreur est survenue"
+  },
+  "eudr": {
+    "compliant": "Conforme",
+    "at_risk": "À vérifier",
+    "non_compliant": "Non conforme",
+    "unassessed": "Non évaluée"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "text": "Cette orbite ne mène nulle part.",
+    "home": "Retour à l'accueil"
+  }
+}

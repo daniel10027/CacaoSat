@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+.env.local
+playwright-report
+test-results
+.git
+*.md
+!README.md
