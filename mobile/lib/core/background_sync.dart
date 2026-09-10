@@ -43,6 +43,6 @@ Future<void> initBackgroundSync() async {
     _taskName,
     frequency: const Duration(minutes: 30),
     constraints: Constraints(networkType: NetworkType.connected),
-    existingWorkPolicy: ExistingWorkPolicy.keep,
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
   );
 }
