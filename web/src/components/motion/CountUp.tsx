@@ -16,13 +16,14 @@ export function CountUp({
   const [display, setDisplay] = useState(reduce ? value : 0);
 
   useEffect(() => {
-    if (!inView || reduce) {
+    // Petits entiers (rang, compteurs) : pas de comptage, on affiche la valeur cible.
+    if (!inView || reduce || Math.abs(value) <= 3) {
       setDisplay(value);
       return;
     }
     let raf = 0;
     const start = performance.now();
-    const from = 0;
+    const from = Math.max(0, value * 0.15);
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);

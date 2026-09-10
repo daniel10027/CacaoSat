@@ -22,3 +22,32 @@ if (!window.ResizeObserver) {
     disconnect() {}
   };
 }
+
+if (!window.IntersectionObserver) {
+  window.IntersectionObserver = class {
+    readonly root = null;
+    readonly rootMargin = '';
+    readonly thresholds = [];
+    constructor(cb: IntersectionObserverCallback) {
+      // Simule une entrée immédiate dans le viewport.
+      queueMicrotask(() =>
+        cb(
+          [
+            {
+              isIntersecting: true,
+              intersectionRatio: 1,
+              target: document.body,
+            } as unknown as IntersectionObserverEntry,
+          ],
+          this as unknown as IntersectionObserver,
+        ),
+      );
+    }
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords() {
+      return [];
+    }
+  } as unknown as typeof IntersectionObserver;
+}

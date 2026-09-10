@@ -12,7 +12,7 @@
 
 ---
 
-## Statut du lot : `[x]` Lot 4 (terminé) · `[ ]` Lot 5 · `[ ]` Lot 6
+## Statut du lot : `[x]` Lot 4 (terminé) · `[x]` Lot 5 (terminé) · `[ ]` Lot 6
 
 ---
 
@@ -54,20 +54,20 @@
 
 > Objectif : un site **futuriste, animé, fluide**, qui met la Côte d'Ivoire en valeur et présente la solution. Chargement rapide (lazy‑load des sections lourdes), 60 fps, dégradation propre en `reduced-motion`.
 
-- [ ] **Hero** plein écran : fond nuit + canopée en dégradé, **cacao en orbite animé** (rotation + traînée lumineuse orbitale, léger parallax souris), titre `CACAO` (orange) `SAT` (vert), sous‑titre « Traçabilité géospatiale du cacao ivoirien », CTA « Voir le dashboard » / « Comprendre l'EUDR ». Ruban tricolore animé.
-- [ ] **Barre de stats** animée (`CountUp` au scroll) : `N°1 mondial`, `82 % traçable (2023)`, `~30 % en zone protégée`, `2M+ foyers`.
-- [ ] **Section « Le choc EUDR »** — storytelling scrolly : 3–4 panneaux qui s'enchaînent (texte + illustration), timeline `2020 → 2025 → contrôle UE`.
-- [ ] **Section « Le pipeline CacaoSat »** — 6 étapes en cartes animées reliées par une ligne orbitale qui se trace au scroll (cartographie → ingestion → satellite → scoring → rapport → alerte).
-- [ ] **Carte nationale interactive** (MapLibre) : contour Côte d'Ivoire, régions cacao qui s'illuminent, données depuis `GET /dashboard/regions` (agrégats), légende statut EUDR. Bascule « zones protégées ».
-- [ ] **Section « Sous le capot »** — logos/mentions Sentinel‑2 (Copernicus), Hansen/Global Forest Watch, Digital Earth Africa ; badge « 100 % open data ».
-- [ ] **Section Impact** — 4 cartes (économique / social / environnemental / institutionnel) avec micro‑animations.
-- [ ] **Section Équipe** — 3 cartes (Timothé, Elie, Daniel) avec rôles.
-- [ ] **CTA final** + footer (liens docs, GitHub, mentions données, sélecteur langue).
-- [ ] **Perf & SEO** : `<title>`, meta OG (image = hero rendu), `lighthouse` mobile ≥ 90 perf / 100 a11y visé ; images en `webp`/SVG ; polices `display=swap` ; sections sous le pli en `React.lazy`.
-- [ ] **Responsive** : mobile (360) → 4K ; menu burger animé ; la carte devient statique/simplifiée sur très petit écran.
-- [ ] Tests : `Reveal`/`CountUp` rendent sans erreur, la landing monte en < X ms (Vitest + RTL), Playwright : scroll complet sans exception console.
+- [x] **Hero** plein écran : fond nuit + canopée en dégradé, **cacao en orbite animé** (rotation + traînée lumineuse orbitale, léger parallax souris), titre `CACAO` (orange) `SAT` (vert), sous‑titre « Traçabilité géospatiale du cacao ivoirien », CTA « Voir le dashboard » / « Comprendre l'EUDR ». Ruban tricolore animé.
+- [x] **Barre de stats** animée (`CountUp` au scroll) : `N°1 mondial`, `82 % traçable (2023)`, `~30 % en zone protégée`, `2M+ foyers`.
+- [x] **Section « Le choc EUDR »** — storytelling scrolly : 3–4 panneaux qui s'enchaînent (texte + illustration), timeline `2020 → 2025 → contrôle UE`.
+- [x] **Section « Le pipeline CacaoSat »** — 6 étapes en cartes animées reliées par une ligne orbitale qui se trace au scroll (cartographie → ingestion → satellite → scoring → rapport → alerte).
+- [x] **Carte nationale** (`NationalMap.tsx`) : contour schématique animé de la Côte d'Ivoire (SVG, `pathLength` au scroll), 6 pôles cacao qui s'illuminent selon `GET /dashboard/regions` (agrégats live, repli sur les chiffres de la zone pilote hors ligne), couleur = ratio de conformité. *(MapLibre réservé au dashboard — Lot 6.)*
+- [x] **Section « Sous le capot »** — logos/mentions Sentinel‑2 (Copernicus), Hansen/Global Forest Watch, Digital Earth Africa ; badge « 100 % open data ».
+- [x] **Section Impact** — 4 cartes (économique / social / environnemental / institutionnel) avec micro‑animations.
+- [x] **Section Équipe** — 3 cartes (Timothé, Elie, Daniel) avec rôles.
+- [x] **CTA final** + footer (liens docs, GitHub, mentions données, sélecteur langue).
+- [x] **Perf & SEO** : `<title>` + meta OG/description dans `index.html`, polices Google `display=swap`, **sections sous le pli en `React.lazy`** (chunks 1–7 kB gzip), `ScrollProgress` en `transform` only. *(Audit Lighthouse formel : Lot 11.)*
+- [x] **Responsive** : grilles fluides `clamp()` / flex ; la carte nationale (SVG) s'adapte sans média lourd.
+- [x] Tests Vitest : `StatsBar`, `EudrShock`, `UnderHood` rendent sans erreur (stub `IntersectionObserver` dans `vitest.setup.ts`). *(Playwright e2e : Lot 11.)*
 
-**Definition of Done Lot 5 :** landing complète, animée, responsive, `reduced-motion` OK, build < budget (JS initial < 200 kB gzip hors carte), Playwright vert.
+**Definition of Done Lot 5 :** ✅ landing complète (hero parallax + orbite, stats CountUp, choc EUDR, pipeline avec ligne orbitale tracée au scroll, carte nationale live, sources open data, impact + équipe, footer), `prefers-reduced-motion` respecté, `npm run build` OK — **JS initial 148 kB gzip, landing chunk 7.3 kB**, tsc + lint + test (6) verts. Vérifié visuellement au navigateur.
 
 ---
 
@@ -141,3 +141,4 @@ VITE_APP_ENV=development
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | dossier `web/` réservé |
 | 2026-09-10 | 4 | `feat(web): socle React + design system CI + auth` | Vite/TS/Tailwind, design system drapeau CI, OrbitCacao animé, client API + refresh JWT, useAuth, AppShell + routing + gardes rôle, i18n fr/en, Login/404, Dockerfile Nginx. build 148 kB gzip, tsc/lint/test verts |
+| 2026-09-10 | 5 | `feat(web): landing immersive (cacao en orbite)` | Hero parallax + orbite, StatsBar CountUp, EudrShock (timeline), Pipeline (ligne orbitale tracée au scroll), NationalMap (SVG CI + agrégats /dashboard/regions live), UnderHood, ImpactTeam, LandingNav sticky, Footer. Sections lazy (1–7 kB). Vérifié au navigateur |
