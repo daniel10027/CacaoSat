@@ -10,8 +10,9 @@ from sqlalchemy.engine import make_url
 
 from app import create_app
 from app.extensions import db as _db
-from app.models import Cooperative, User
-from app.models.enums import UserRole
+from app.geo import polygon_area_ha, polygon_centroid, to_wkt_element
+from app.models import Cooperative, Parcel, Producer, User
+from app.models.enums import ParcelSource, UserRole
 
 TEST_DB_URL = os.environ.get(
     "TEST_DATABASE_URL",
@@ -99,5 +100,49 @@ def auth_header(client, seeded):
         resp = client.post("/api/v1/auth/login", json={"email": email, "password": "secret123"})
         assert resp.status_code == 200, resp.get_json()
         return {"Authorization": f"Bearer {resp.get_json()['access_token']}"}
+
+    return _make
+
+
+def square_polygon(lon: float = -7.49, lat: float = 6.54, edge_deg: float = 0.0009):
+    from shapely.geometry import Polygon
+
+    d = edge_deg / 2
+    return Polygon(
+        [(lon - d, lat - d), (lon + d, lat - d), (lon + d, lat + d), (lon - d, lat + d), (lon - d, lat - d)]
+    )
+
+
+@pytest.fixture()
+def make_parcel(db, seeded):
+    counter = {"n": 0}
+
+    def _make(*, polygon=None, cooperative=None, producer=None, code=None, national_id="CI999", **kw):
+        from shapely.geometry import Point
+
+        coop = cooperative or seeded["cooperative"]
+        if producer is None:
+            producer = Producer(
+                cooperative=coop, full_name="Producteur Test", national_id=national_id
+            )
+        db.session.add(producer)
+        db.session.flush()
+        poly = polygon or square_polygon()
+        counter["n"] += 1
+        cx, cy = polygon_centroid(poly)
+        parcel = Parcel(
+            code=code or f"{coop.code}-{counter['n']:04d}",
+            cooperative=coop,
+            producer=producer,
+            geometry=to_wkt_element(poly),
+            centroid=to_wkt_element(Point(cx, cy)),
+            area_ha=polygon_area_ha(poly),
+            gps_accuracy_m=kw.pop("gps_accuracy_m", 5.0),
+            source=kw.pop("source", ParcelSource.MOBILE),
+            **kw,
+        )
+        db.session.add(parcel)
+        db.session.commit()
+        return parcel
 
     return _make

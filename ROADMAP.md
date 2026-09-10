@@ -22,7 +22,7 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 |-----|-------|---------------|--------|------|
 | 0 | Fondations du dépôt | ce fichier | `[x]` | `chore: bootstrap monorepo + tracking docs` |
 | 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): socle Flask + PostGIS + auth JWT` |
-| 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
+| 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): moteur satellite mock + scoring EUDR + API métier` |
 | 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
 | 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
 | 5 | Web — landing page immersive (cacao en orbite) | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
@@ -67,6 +67,22 @@ Détail des tâches : [docs/BACKEND.md § Lot 1](docs/BACKEND.md). Résumé livr
 - [x] Suite **pytest : 20 tests verts, couverture 85 %**, `ruff check` propre
 
 **Definition of Done :** ✅ `make test` vert (85 %), `docker compose up --build backend db` opérationnel, `flask db upgrade`/`downgrade` réversibles, `/health/ready`=200, `/auth/login`→JWT.
+
+---
+
+## Lot 2 — Backend, moteur satellite + scoring EUDR + API métier  `[x]`
+
+Détail : [docs/BACKEND.md § Lot 2](docs/BACKEND.md). Résumé livré :
+
+- [x] **Mocks déterministes** (RNG NumPy seedé par `hash(parcel.id)`) : Sentinel‑2 (série NDVI mensuelle, chute simulable), Hansen/GFW (couvert 2000/2020, perte annuelle post‑2020), Digital Earth Africa (indice de dégradation), aires protégées (GeoJSON embarqué, recouvrement géométrique réel) + mocks e‑mail (MailHog)/SMS
+- [x] **Moteur d'analyse** `run_analysis` : détection de rupture NDVI (moyenne glissante), `forest_loss_ha`, `loss_events`, recouvrement aire protégée, `confidence` (accord des signaux) → `AnalysisRun`
+- [x] **Moteur de scoring EUDR** `compute_score` : 5 facteurs pondérés (45/20/15/10/10), `factors[]` explicable, `risk_level` + `eudr_status` dérivés
+- [x] **API métier** : CRUD `/cooperatives` `/producers` `/parcels` (scoping par rôle, pagination, filtres `risk_level`/`eudr_status`/`bbox`/`q`, tri), `POST /parcels/{id}/analyze`, `POST /analysis/batch`, `GET /parcels/{id}/history`, `GET /parcels/{id}.geojson`
+- [x] **Dashboard** : `/dashboard/summary` (KPIs, distribution de score, tendance mensuelle), `/dashboard/map` (FeatureCollection scorée), `/dashboard/regions` (agrégats nationaux, public)
+- [x] **OpenAPI 3.0.3** `/openapi.json` (25 routes) + console `/docs`
+- [x] **62 tests** pytest verts, couverture **86 %**, `ruff` propre
+
+**Definition of Done :** ✅ validé en conteneur (`docker compose up`) — chaîne parcelle → analyse → score → dashboard opérationnelle de bout en bout ; batch 21/21 ; jeu de démo → 12 conformes / 4 à risque / 5 non‑conformes.
 
 ---
 

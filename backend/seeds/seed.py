@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import math
 import random
 from datetime import UTC, date, datetime
 
@@ -56,10 +57,11 @@ def _now() -> datetime:
     return datetime.now(UTC)
 
 
-def _square(lon: float, lat: float, side_m: float) -> Polygon:
-    """Petit polygone rectangulaire ~side_m mètres autour de (lon, lat)."""
-    dlat = side_m / 111_320.0
-    dlon = side_m / (111_320.0 * 0.7)  # cos(~6.5°N) ≈ 0.75 ; marge prudente
+def _square(lon: float, lat: float, edge_m: float) -> Polygon:
+    """Polygone carré d'arête ~edge_m mètres centré sur (lon, lat)."""
+    half = edge_m / 2.0
+    dlat = half / 110_574.0
+    dlon = half / (111_320.0 * math.cos(math.radians(lat)))
     return Polygon(
         [
             (lon - dlon, lat - dlat),
@@ -133,7 +135,7 @@ def _seed_demo(coops: list[Cooperative]) -> int:
             for _ in range(rng.randint(1, 2)):
                 lon = base_lon + rng.uniform(-0.03, 0.03)
                 lat = base_lat + rng.uniform(-0.03, 0.03)
-                poly = _square(lon, lat, rng.uniform(60, 130))
+                poly = _square(lon, lat, rng.uniform(110, 240))
                 cx, cy = polygon_centroid(poly)
                 parcel = Parcel(
                     code=f"{coop.code}-{created + 1:04d}",

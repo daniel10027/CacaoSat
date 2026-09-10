@@ -8,7 +8,7 @@
 
 ---
 
-## Statut du lot : `[x]` Lot 1 (terminé) · `[ ]` Lot 2 · `[ ]` Lot 3
+## Statut du lot : `[x]` Lot 1 (terminé) · `[x]` Lot 2 (terminé) · `[ ]` Lot 3
 
 ---
 
@@ -75,25 +75,25 @@
 ## Lot 2 — Moteur satellite (mock) + scoring EUDR + API métier
 
 ### 2.1 Mocks des services externes (déterministes)
-- [ ] `app/mocks/__init__.py` — registre, seed global `MOCK_SEED`
-- [ ] `app/mocks/sentinel2.py` — pour une géométrie + intervalle de dates, renvoie une **série temporelle NDVI** (12–36 points) générée de façon déterministe (hash(parcel_id) → RNG NumPy) : saisonnalité + tendance + bruit ; capable de simuler une **chute nette de NDVI** (coupe forestière) à une date donnée
-- [ ] `app/mocks/gfw_hansen.py` — renvoie `tree_cover_2000_pct`, `lossyear` (0 = pas de perte, sinon année 2001‑2025) échantillonné sur une grille dans le polygone → `forest_cover_2020_pct`, `forest_loss_ha` post‑2020
-- [ ] `app/mocks/digital_earth_africa.py` — indice de dégradation des terres 0‑1 + tendance (utile zones frontalières)
-- [ ] `app/mocks/protected_areas.py` — jeu de polygones d'aires protégées / forêts classées de la zone pilote (GeoJSON embarqué) + fonction `overlap_ha(geom)`
-- [ ] `app/mocks/fixtures/` — GeoJSON aires protégées, paramètres de scénarios (`compliant`, `at_risk`, `deforested`) mappés par `parcel.code` pour une démo scénarisée
-- [ ] Chaque mock expose `provider_version` (pour `AnalysisRun.provider_versions`) et est **remplaçable** par une vraie implémentation (interface `SatelliteProvider`)
+- [x] `app/mocks/__init__.py` — registre, seed global `MOCK_SEED`
+- [x] `app/mocks/sentinel2.py` — pour une géométrie + intervalle de dates, renvoie une **série temporelle NDVI** (12–36 points) générée de façon déterministe (hash(parcel_id) → RNG NumPy) : saisonnalité + tendance + bruit ; capable de simuler une **chute nette de NDVI** (coupe forestière) à une date donnée
+- [x] `app/mocks/gfw_hansen.py` — renvoie `tree_cover_2000_pct`, `lossyear` (0 = pas de perte, sinon année 2001‑2025) échantillonné sur une grille dans le polygone → `forest_cover_2020_pct`, `forest_loss_ha` post‑2020
+- [x] `app/mocks/digital_earth_africa.py` — indice de dégradation des terres 0‑1 + tendance (utile zones frontalières)
+- [x] `app/mocks/protected_areas.py` — jeu de polygones d'aires protégées / forêts classées de la zone pilote (GeoJSON embarqué) + fonction `overlap_ha(geom)`
+- [x] `app/mocks/fixtures/protected_areas.geojson` — aires protégées (Forêt classée du Cavally, du Goin‑Débé, tampon Parc de Taï). Scénarios `compliant`/`at_risk`/`deforested` attribués de façon déterministe par `hash(parcel.id)` (+ `scenarios.SCENARIO_OVERRIDES` par code pour scénariser la démo)
+- [x] Chaque mock expose `provider_version` (pour `AnalysisRun.provider_versions`) et est **remplaçable** par une vraie implémentation (interface `SatelliteProvider`)
 
 ### 2.2 Moteur d'analyse
-- [ ] `app/services/analysis.py` — `run_analysis(parcel) -> AnalysisRun` :
+- [x] `app/services/analysis.py` — `run_analysis(parcel) -> AnalysisRun` :
   - récupère NDVI (Sentinel‑2 mock), couvert forestier (GFW mock), dégradation (DEA mock), recouvrement aire protégée
   - détecte une rupture dans la série NDVI (méthode : moyenne glissante + seuil d'écart + `lossyear > 2020`)
   - calcule `forest_loss_ha`, `loss_events` (liste `{date, area_ha, ndvi_drop}`), `confidence`
   - persiste `AnalysisRun`
-- [ ] `app/services/analysis.py::analyze_many(parcel_ids)` — traitement par lot, idempotent
-- [ ] Job planifié APScheduler : ré‑analyse quotidienne des parcelles `at_risk` (génère des alertes — voir Lot 3)
+- [x] `app/services/analysis.py::analyze_many(parcel_ids)` — traitement par lot, rollback + rapport d'échec par parcelle
+- [ ] Job planifié APScheduler : ré‑analyse quotidienne des parcelles `at_risk` — **déplacé au Lot 3** (branché avec le moteur d'alertes)
 
 ### 2.3 Moteur de scoring EUDR
-- [ ] `app/services/scoring.py` — `compute_score(analysis_run) -> ComplianceScore`, **logique réelle, pondérée, explicable** :
+- [x] `app/services/scoring.py` — `compute_score(analysis_run, parcel, context) -> ComplianceScore`, **logique réelle, pondérée, explicable** :
 
   | Facteur | Poids | Règle |
   |--------|------:|------|
@@ -107,29 +107,29 @@
   - `risk_level` : `score ≥ 80 → low` · `50‑79 → medium` · `< 50 → high`
   - `eudr_status` : `low & 0 déforestation & 0 recouvrement → compliant` · `medium → at_risk` · `high → non_compliant`
   - `factors` : liste `{key, label, weight, raw_value, points, explanation}` (traçable dans le rapport)
-- [ ] `tests/test_scoring.py` — cas limites : parcelle propre → `compliant` ~95 ; perte 3 % surface → `at_risk` ; coupe nette + aire protégée → `non_compliant` ; barème documenté figé par snapshot
+- [x] `tests/test_scoring.py` — cas limites : parcelle propre → `compliant` ~95 ; perte 3 % surface → `at_risk` ; coupe nette + aire protégée → `non_compliant` ; barème documenté figé par snapshot
 
 ### 2.4 Endpoints CRUD & métier
-- [ ] `app/api/cooperatives.py` — `GET/POST /cooperatives`, `GET/PATCH /cooperatives/{id}` (admin/régulateur ; manager lecture de la sienne)
-- [ ] `app/api/producers.py` — `GET/POST /producers`, `GET/PATCH/DELETE /producers/{id}` (scopé coopérative), recherche `?q=`
-- [ ] `app/api/parcels.py` — `GET /parcels` (filtres : `cooperative_id, producer_id, risk_level, eudr_status, bbox`, pagination, tri), `POST /parcels` (GeoJSON), `GET/PATCH/DELETE /parcels/{id}`, `GET /parcels/{id}.geojson`
-- [ ] `POST /parcels/{id}/analyze` — lance analyse + scoring, renvoie `{analysis_run, compliance_score}`
-- [ ] `POST /analysis/batch` — `{parcel_ids | cooperative_id}` → lot, renvoie résumé
-- [ ] `GET /parcels/{id}/history` — analyses + scores triés
-- [ ] `app/api/dashboard.py` :
+- [x] `app/api/cooperatives.py` — `GET/POST /cooperatives`, `GET/PATCH /cooperatives/{id}` (admin/régulateur ; manager lecture de la sienne)
+- [x] `app/api/producers.py` — `GET/POST /producers`, `GET/PATCH/DELETE /producers/{id}` (scopé coopérative), recherche `?q=`
+- [x] `app/api/parcels.py` — `GET /parcels` (filtres : `cooperative_id, producer_id, risk_level, eudr_status, bbox`, pagination, tri), `POST /parcels` (GeoJSON), `GET/PATCH/DELETE /parcels/{id}`, `GET /parcels/{id}.geojson`
+- [x] `POST /parcels/{id}/analyze` — lance analyse + scoring, renvoie `{analysis_run, compliance_score}`
+- [x] `POST /analysis/batch` — `{parcel_ids | cooperative_id}` → lot, renvoie résumé
+- [x] `GET /parcels/{id}/history` — analyses + scores triés
+- [x] `app/api/dashboard.py` :
   - `GET /dashboard/summary?cooperative_id=` → `{parcels_total, area_ha_total, compliant, at_risk, non_compliant, deforestation_events, high_risk_area_ha, coverage_pct, score_distribution, trend: [{month, compliant_pct}]}`
   - `GET /dashboard/map?cooperative_id=&bbox=` → `FeatureCollection` parcelles + `properties {code, producer, score, risk_level, eudr_status, area_ha}`
   - `GET /dashboard/regions` → agrégats par région (pour la carte nationale de la landing)
-- [ ] Pagination/tri/filtre factorisés (`app/api/_pagination.py`)
-- [ ] OpenAPI : `app/openapi.py` sert `/api/v1/openapi.json` (généré depuis les schémas Marshmallow via `apispec`) + Swagger UI statique sur `/api/v1/docs`
+- [x] Pagination/tri/filtre factorisés (`app/api/_helpers.py`)
+- [x] OpenAPI : `app/openapi.py` sert `/api/v1/openapi.json` (spec 3.0.3 maintenue à la main, zéro dépendance, couvre les 25 routes) + console Swagger UI sur `/api/v1/docs` (assets via CDN unpkg — outil de dev)
 
 ### 2.5 Tests (Lot 2)
-- [ ] `tests/test_mocks.py` — déterminisme (même seed → même sortie), scénarios `compliant/at_risk/deforested`
-- [ ] `tests/test_analysis.py` — détection de rupture NDVI, `forest_loss_ha`, recouvrement aire protégée
-- [ ] `tests/test_parcels_api.py`, `tests/test_dashboard_api.py` — auth, scoping coopérative, formes de réponse
-- [ ] Couverture ≥ 82 %
+- [x] `tests/test_mocks.py` — déterminisme (même seed → même sortie), scénarios `compliant/at_risk/deforested`
+- [x] `tests/test_analysis.py` — détection de rupture NDVI, `forest_loss_ha`, recouvrement aire protégée
+- [x] `tests/test_parcels_api.py`, `tests/test_dashboard_api.py`, `tests/test_cooperatives_api.py`, `tests/test_producers_api.py` — auth, scoping coopérative, filtres, bbox, pagination, formes de réponse
+- [x] Couverture **86 %** (62 tests)
 
-**Definition of Done Lot 2 :** créer une parcelle → `POST /analyze` → score cohérent avec le scénario ; `GET /dashboard/summary` et `/dashboard/map` renvoient des données exploitables par le web ; Swagger UI accessible ; tests verts.
+**Definition of Done Lot 2 :** ✅ validé en conteneur — `POST /parcels` (GeoJSON) → `POST /{id}/analyze` → score EUDR explicable (5 facteurs) cohérent avec le scénario ; `POST /analysis/batch` (21/21) ; `GET /dashboard/summary` (KPIs + distribution + tendance), `/dashboard/map` (FeatureCollection scorée), `/dashboard/regions` (public) exploitables ; `/openapi.json` + `/docs` servis ; `make test` vert (62 tests, 86 %), `ruff` propre.
 
 ---
 
@@ -233,3 +233,4 @@ MOCK_SEED=42
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | squelette `backend/` créé |
 | 2026-09-10 | 1 | `feat(backend): socle Flask + PostGIS + auth JWT` | app factory, 10 modèles PostGIS, migration Alembic réversible, auth argon2/JWT, health/ready/metrics, seed + seed-demo, Dockerfile, 20 tests (cov 85 %) |
+| 2026-09-10 | 2 | `feat(backend): moteur satellite mock + scoring EUDR + API métier` | mocks Sentinel-2/GFW-Hansen/DEA/aires protégées déterministes, moteur d'analyse (rupture NDVI, perte couvert, recouvrement), scoring EUDR pondéré/explicable (5 facteurs), CRUD cooperatives/producers/parcels, `/parcels/{id}/analyze`, `/analysis/batch`, `/dashboard/{summary,map,regions}`, OpenAPI 3.0.3 + `/docs`. 62 tests (cov 86 %) |

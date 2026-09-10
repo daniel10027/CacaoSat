@@ -19,7 +19,7 @@ exclude = ["migrations/versions", ".venv"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4", "SIM", "PL"]
-ignore = ["PLR0913", "PLR2004", "B008", "PLR0912", "PLR0915"]
+ignore = ["PLR0913", "PLR2004", "B008", "PLR0912", "PLR0915", "SIM108"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app", "seeds", "tests"]
