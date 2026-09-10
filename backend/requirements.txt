@@ -19,3 +19,5 @@ numpy==2.2.0
 APScheduler==3.11.0
 redis==5.2.1
 gunicorn==23.0.0
+reportlab==4.2.5
+boto3==1.35.76

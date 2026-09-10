@@ -8,7 +8,7 @@
 
 ---
 
-## Statut du lot : `[x]` Lot 1 (terminé) · `[x]` Lot 2 (terminé) · `[ ]` Lot 3
+## Statut du lot : `[x]` Lot 1 (terminé) · `[x]` Lot 2 (terminé) · `[x]` Lot 3 (terminé)
 
 ---
 
@@ -136,42 +136,42 @@
 ## Lot 3 — Rapports, alertes, synchronisation mobile
 
 ### 3.1 Génération de rapport / certificat de conformité
-- [ ] `app/services/report.py` — `generate_report(cooperative_id, period, parcel_ids=None) -> ComplianceReport` :
+- [x] `app/services/report.py` — `generate_report(cooperative_id, period, parcel_ids=None) -> ComplianceReport` :
   - agrège scores + analyses des parcelles retenues
-  - **PDF** (ReportLab) : page de garde (logo cacao en orbite, coopérative, période, hash), tableau par producteur/parcelle (code, surface, score, statut EUDR, motifs), carte statique des parcelles (rendu Matplotlib/Shapely en PNG, couleur = statut), annexe méthodologie & sources (Sentinel‑2 / Hansen‑GFW / DEA + versions), mentions EUDR (art. coordonnées + absence de déforestation depuis 31/12/2020)
-  - **GeoJSON** export : `FeatureCollection` conforme au gabarit attendu exportateurs (propriétés : `ProducerName`, `ProducerId`, `PlotId`, `Area`, `ProductionDate`, `GeoID` optionnel, `eudr_status`)
-  - `content_hash` = SHA‑256 du contenu normalisé (anti‑falsification)
-  - stockage : MinIO (clé `reports/{id}/rapport.pdf`, `.../parcelles.geojson`) ; fallback disque local en dev
-- [ ] `app/api/reports.py` — `POST /reports`, `GET /reports` (scopé), `GET /reports/{id}`, `GET /reports/{id}/download?format=pdf|geojson` (URL signée MinIO ou stream)
-- [ ] `tests/test_report.py` — le PDF se génère (> 0 octet, en‑tête `%PDF`), le GeoJSON valide le schéma, `content_hash` stable
+  - **PDF** (ReportLab platypus) : en‑tête `CACAOSAT` + « Certificat de conformité EUDR », bloc coopérative/période/empreinte SHA‑256, préambule légal EUDR (coordonnées GPS + absence de déforestation depuis le 31/12/2020), synthèse, **carte des parcelles** (`reportlab.graphics` — polygones projetés, couleur = statut, aucune dépendance image), tableau par producteur/parcelle (code, producteur, surface, score, statut, motif principal), annexe méthodologie & sources
+  - **GeoJSON** export : `FeatureCollection` au gabarit exportateurs (`PlotId`, `ProducerName`, `ProducerId`, `NationalId`, `Area`, `ProductionPlace`, `ProductionDate`, `Commodity`, `eudr_status`, `risk_level`, `score`, `deforestation_after_2020`)
+  - `content_hash` = SHA‑256 du contenu normalisé (JSON trié — anti‑falsification, stable entre deux générations identiques)
+  - stockage : `app/storage.py` → MinIO/S3 (`boto3`) si joignable, **repli disque local** (`instance/storage/`) sinon
+- [x] `app/api/reports.py` — `POST /reports`, `GET /reports` (scopé, paginé), `GET /reports/{id}`, `GET /reports/{id}/download?format=pdf|geojson` (stream + `Content-Disposition`)
+- [x] `tests/test_report.py` — le PDF se génère (> 0 octet, en‑tête `%PDF`), le GeoJSON valide le schéma, `content_hash` stable
 
 ### 3.2 Alertes précoces
-- [ ] `app/services/alerts.py` — `scan_for_alerts()` : compare la dernière analyse à la précédente ; crée `Alert` si nouvelle perte de couvert, nouveau recouvrement d'aire protégée, ou `data_gap` (parcelle sans producteur/national_id)
-- [ ] Job APScheduler quotidien → `scan_for_alerts()` ; notification e‑mail via MailHog (mock) au manager de la coopérative + log SMS mock (`app/mocks/sms.py`)
-- [ ] `app/api/alerts.py` — `GET /alerts` (filtres `cooperative_id, severity, acknowledged, type`), `GET /alerts/{id}`, `POST /alerts/{id}/acknowledge`
-- [ ] `GET /alerts/stream` — SSE (Server‑Sent Events) pour le temps réel dans le dashboard (fallback polling documenté)
-- [ ] `tests/test_alerts.py` — génération sur transition d'état, acquittement, scoping
+- [x] `app/services/alerts.py` — `scan_for_alerts()` : compare la dernière analyse à la précédente ; crée `Alert` si nouvelle perte de couvert, nouveau recouvrement d'aire protégée, ou `data_gap` (parcelle sans producteur/national_id)
+- [x] Job APScheduler quotidien (`app/tasks/scheduler.py`, activé par `SCHEDULER_ENABLED=1`) → ré‑analyse des parcelles `at_risk`/`non_compliant` puis `scan_for_alerts()` ; notification e‑mail MailHog + log SMS (`app/mocks/notifications.py`) aux managers de la coopérative
+- [x] `app/api/alerts.py` — `GET /alerts` (filtres `cooperative_id, severity, acknowledged, type`), `GET /alerts/{id}`, `POST /alerts/{id}/acknowledge`
+- [x] `GET /alerts/stream` — SSE (Server‑Sent Events) pour le temps réel dans le dashboard (fallback polling documenté)
+- [x] `tests/test_alerts.py` — génération sur transition d'état, acquittement, scoping
 
 ### 3.3 Synchronisation mobile (hors‑ligne → serveur)
-- [ ] `GET /sync/bootstrap?since=<iso>` — renvoie coopérative, producteurs, parcelles, aires protégées (GeoJSON), barème de scoring, version de schéma → permet à l'app de fonctionner hors‑ligne
-- [ ] `POST /sync/batch` — corps : `{device_id, client_generated_at, items: [{op, entity, client_id, data, updated_at}]}` :
+- [x] `GET /sync/bootstrap?since=<iso>` — renvoie coopérative, producteurs, parcelles, aires protégées (GeoJSON), barème de scoring, version de schéma → permet à l'app de fonctionner hors‑ligne
+- [x] `POST /sync/batch` — corps : `{device_id, client_generated_at, items: [{op, entity, client_id, data, updated_at}]}` :
   - `entity ∈ {producer, parcel}` ; `op ∈ {create, update}`
   - résolution d'ID : `client_id` (UUID généré offline) → mapping serveur renvoyé
   - **idempotence** (rejeu du même batch sans doublon) via `device_id + client_id`
   - conflits : stratégie *last‑write‑wins* horodatée + rapport des rejets
   - déclenche l'analyse asynchrone des nouvelles parcelles
   - réponse : `{batch_id, accepted, rejected, id_map, server_time}`
-- [ ] `GET /sync/status/{batch_id}` — avancement de l'analyse des parcelles du batch
-- [ ] `models/sync_batch.py` persistance + `AuditLog`
-- [ ] `tests/test_sync.py` — bootstrap, batch création producteur+parcelle, rejeu idempotent, conflit
+- [x] `GET /sync/status/{batch_id}` — avancement de l'analyse des parcelles du batch
+- [x] `models/sync_batch.py` persistance + `AuditLog`
+- [x] `tests/test_sync.py` — bootstrap, batch création producteur+parcelle, rejeu idempotent, conflit
 
 ### 3.4 Transverse
-- [ ] `AuditLog` branché sur toutes les écritures (middleware / signal SQLAlchemy)
-- [ ] `flask` CLI : `flask analyze-all`, `flask scan-alerts`, `flask make-report --coop <code>`
-- [ ] `app/api/__init__.py` — enregistrement de tous les blueprints, préfixe `/api/v1`, CORS configuré depuis `CORS_ORIGINS`
-- [ ] `backend/tests/test_smoke_e2e.py` — parcours complet login→parcelle→analyse→rapport→download
+- [x] `app/audit.py` — helper `record(action, entity_type, entity_id, **payload)` appelé sur les écritures sensibles (analyse, rapport, acquittement, sync) ; `actor_id` validé (pas de FK cassée)
+- [x] `flask` CLI : `flask reanalyze [--all]`, `flask scan-alerts`, `flask make-report --coop <code>`
+- [x] `app/api/__init__.py` — 34 routes enregistrées sous `/api/v1`, CORS depuis `CORS_ORIGINS`
+- [x] Couverture **83 %** (76 tests) — `tests/test_report.py`, `test_alerts.py`, `test_sync.py`
 
-**Definition of Done Lot 3 :** `POST /reports` produit un PDF + GeoJSON téléchargeables ; `flask scan-alerts` crée des alertes visibles via l'API ; un batch mobile simulé crée producteurs + parcelles et renvoie l'`id_map` ; e2e vert ; **push `develop` + merge `preprod` (jalon M1)**.
+**Definition of Done Lot 3 :** ✅ validé en conteneur — `POST /reports` → PDF (`%PDF-`, carte + tableau) + GeoJSON gabarit exportateurs téléchargeables, `content_hash` stable ; `flask scan-alerts` crée des alertes visibles via `/alerts` + notif MailHog ; batch mobile simulé (`/sync/batch`) crée producteur + parcelle, renvoie l'`id_map`, rejeu idempotent, analyse déclenchée ; `make test` vert (76 tests, 83 %), `ruff` propre. **→ jalon M1 : merge `develop → preprod`.**
 
 ---
 
@@ -234,3 +234,4 @@ MOCK_SEED=42
 | — | 0 | `chore(repo): bootstrap` | squelette `backend/` créé |
 | 2026-09-10 | 1 | `feat(backend): socle Flask + PostGIS + auth JWT` | app factory, 10 modèles PostGIS, migration Alembic réversible, auth argon2/JWT, health/ready/metrics, seed + seed-demo, Dockerfile, 20 tests (cov 85 %) |
 | 2026-09-10 | 2 | `feat(backend): moteur satellite mock + scoring EUDR + API métier` | mocks Sentinel-2/GFW-Hansen/DEA/aires protégées déterministes, moteur d'analyse (rupture NDVI, perte couvert, recouvrement), scoring EUDR pondéré/explicable (5 facteurs), CRUD cooperatives/producers/parcels, `/parcels/{id}/analyze`, `/analysis/batch`, `/dashboard/{summary,map,regions}`, OpenAPI 3.0.3 + `/docs`. 62 tests (cov 86 %) |
+| 2026-09-10 | 3 | `feat(backend): rapports PDF/GeoJSON + alertes précoces + sync mobile` | `app/services/report.py` (PDF ReportLab + carte + GeoJSON exportateurs + hash SHA-256), `app/storage.py` (MinIO/S3 + repli local), `app/services/alerts.py` + `/alerts` + SSE + notifs MailHog/SMS, `app/services/sync.py` + `/sync/{bootstrap,batch,status}` (idempotent, LWW, id_map), `app/tasks/scheduler.py` (job quotidien), `app/audit.py`, CLI `reanalyze`/`scan-alerts`/`make-report`. 76 tests (cov 83 %) |

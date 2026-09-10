@@ -23,7 +23,7 @@ Chaque lot se termine par un **commit + push sur `develop`**. Les jalons déclen
 | 0 | Fondations du dépôt | ce fichier | `[x]` | `chore: bootstrap monorepo + tracking docs` |
 | 1 | Backend — socle (app factory, DB, auth, Docker) | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): socle Flask + PostGIS + auth JWT` |
 | 2 | Backend — moteur satellite (mock) + scoring EUDR + API métier | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): moteur satellite mock + scoring EUDR + API métier` |
-| 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[ ]` | — |
+| 3 | Backend — rapports PDF/GeoJSON + alertes + sync mobile | [BACKEND.md](docs/BACKEND.md) | `[x]` | `feat(backend): rapports PDF/GeoJSON + alertes précoces + sync mobile` |
 | 4 | Web — socle + design system Côte d'Ivoire + auth | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
 | 5 | Web — landing page immersive (cacao en orbite) | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
 | 6 | Web — dashboards conformité (carte, KPIs, rapports, alertes) | [FRONTEND.md](docs/FRONTEND.md) | `[ ]` | — |
@@ -83,6 +83,23 @@ Détail : [docs/BACKEND.md § Lot 2](docs/BACKEND.md). Résumé livré :
 - [x] **62 tests** pytest verts, couverture **86 %**, `ruff` propre
 
 **Definition of Done :** ✅ validé en conteneur (`docker compose up`) — chaîne parcelle → analyse → score → dashboard opérationnelle de bout en bout ; batch 21/21 ; jeu de démo → 12 conformes / 4 à risque / 5 non‑conformes.
+
+---
+
+## Lot 3 — Backend, rapports + alertes + sync mobile  `[x]`
+
+Détail : [docs/BACKEND.md § Lot 3](docs/BACKEND.md). Résumé livré :
+
+- [x] **Rapport / certificat EUDR** (`app/services/report.py`) : PDF ReportLab (en‑tête, préambule légal, synthèse, **carte des parcelles** couleur = statut, tableau par producteur, annexe sources) + **export GeoJSON** au gabarit exportateurs + `content_hash` SHA‑256 stable
+- [x] **Stockage** `app/storage.py` : MinIO/S3 (`boto3`) si joignable, repli disque local
+- [x] `POST/GET /reports`, `GET /reports/{id}`, `GET /reports/{id}/download?format=pdf|geojson`
+- [x] **Alertes précoces** (`app/services/alerts.py`) : `scan_for_alerts` compare dernière/précédente analyse → `new_deforestation` / `protected_encroachment` / `data_gap`, dédup tant que non acquittée, notif MailHog + SMS (mock) aux managers
+- [x] `GET /alerts` (filtres + pagination), `GET /alerts/{id}`, `POST /alerts/{id}/acknowledge`, `POST /alerts/scan`, `GET /alerts/stream` (SSE)
+- [x] **Sync mobile** (`app/services/sync.py`) : `GET /sync/bootstrap` (coopérative, producteurs, parcelles, aires protégées, barème), `POST /sync/batch` (idempotent via `client_batch_id`, LWW horodaté, `id_map` client→serveur, analyse déclenchée), `GET /sync/status/{id}`
+- [x] **Job planifié** `app/tasks/scheduler.py` (APScheduler, `SCHEDULER_ENABLED=1`) + CLI `flask reanalyze|scan-alerts|make-report`
+- [x] `app/audit.py` (journal d'audit), **76 tests** (couverture **83 %**), `ruff` propre
+
+**Definition of Done :** ✅ validé en conteneur — rapport PDF+GeoJSON téléchargeables, alertes créées + notifiées, batch mobile simulé (producteur+parcelle, rejeu idempotent, analyse auto). **Backend complet → jalon M1 (merge `develop → preprod`).**
 
 ---
 

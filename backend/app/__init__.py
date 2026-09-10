@@ -46,6 +46,11 @@ def create_app(config_name: str | None = None) -> Flask:
     _register_jwt_handlers(app)
     _register_cli(app)
 
+    if app.config.get("SCHEDULER_ENABLED"):
+        from app.tasks.scheduler import init_scheduler
+
+        init_scheduler(app)
+
     @app.get("/")
     def index():
         return jsonify(

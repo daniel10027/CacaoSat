@@ -14,6 +14,9 @@ _TAG_COOP = "Coopératives"
 _TAG_PROD = "Producteurs"
 _TAG_PARC = "Parcelles"
 _TAG_DASH = "Dashboard"
+_TAG_REP = "Rapports"
+_TAG_ALERT = "Alertes"
+_TAG_SYNC = "Synchronisation mobile"
 _TAG_OPS = "Ops"
 
 _ok = {"200": {"description": "OK"}}
@@ -45,7 +48,7 @@ SPEC = {
     "openapi": "3.0.3",
     "info": {
         "title": "CacaoSat API",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "description": "Traçabilité géospatiale du cacao ivoirien — conformité EUDR.",
     },
     "servers": [{"url": "/api/v1"}],
@@ -192,6 +195,84 @@ SPEC = {
         },
         "/dashboard/regions": {
             "get": _path("Agrégats nationaux par région (public)", _TAG_DASH, secured=False)
+        },
+        "/reports": {
+            "get": _path("Liste des rapports de conformité", _TAG_REP),
+            "post": _path(
+                "Générer un rapport / certificat EUDR (PDF + GeoJSON)",
+                _TAG_REP,
+                responses=_created,
+                body={
+                    "period_start": {"type": "string", "format": "date"},
+                    "period_end": {"type": "string", "format": "date"},
+                    "parcel_ids": {"type": "array", "items": {"type": "string"}},
+                    "title": {"type": "string"},
+                },
+            ),
+        },
+        "/reports/{report_id}": {"get": _path("Détail d'un rapport", _TAG_REP)},
+        "/reports/{report_id}/download": {
+            "get": _path(
+                "Télécharger le rapport (format=pdf|geojson)",
+                _TAG_REP,
+                params=[{"name": "format", "in": "query",
+                         "schema": {"type": "string", "enum": ["pdf", "geojson"]}}],
+            )
+        },
+        "/alerts": {
+            "get": _path(
+                "Liste des alertes précoces",
+                _TAG_ALERT,
+                params=_QUERY_PAGE
+                + [
+                    {"name": "severity", "in": "query", "schema": {"type": "string"}},
+                    {"name": "type", "in": "query", "schema": {"type": "string"}},
+                    {"name": "acknowledged", "in": "query", "schema": {"type": "boolean"}},
+                ],
+            )
+        },
+        "/alerts/{alert_id}": {"get": _path("Détail d'une alerte", _TAG_ALERT)},
+        "/alerts/{alert_id}/acknowledge": {
+            "post": _path("Acquitter une alerte", _TAG_ALERT)
+        },
+        "/alerts/scan": {
+            "post": _path("Déclencher un scan d'alertes", _TAG_ALERT, responses=_created)
+        },
+        "/alerts/stream": {
+            "get": _path("Flux SSE des nouvelles alertes (text/event-stream)", _TAG_ALERT)
+        },
+        "/sync/bootstrap": {
+            "get": _path(
+                "Données de référence pour le mode hors-ligne",
+                _TAG_SYNC,
+                params=[{"name": "since", "in": "query", "schema": {"type": "string", "format": "date-time"}}],
+            )
+        },
+        "/sync/batch": {
+            "post": _path(
+                "Pousser un lot de relevés terrain (idempotent via client_batch_id)",
+                _TAG_SYNC,
+                responses={"200": {"description": "OK"}, "207": {"description": "Partiel"}},
+                body={
+                    "device_id": {"type": "string"},
+                    "client_batch_id": {"type": "string"},
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "op": {"type": "string", "enum": ["create", "update"]},
+                                "entity": {"type": "string", "enum": ["producer", "parcel"]},
+                                "client_id": {"type": "string"},
+                                "data": {"type": "object"},
+                            },
+                        },
+                    },
+                },
+            )
+        },
+        "/sync/status/{batch_id}": {
+            "get": _path("État d'un batch de synchronisation", _TAG_SYNC)
         },
         "/openapi.json": {"get": _path("Cette spécification", _TAG_OPS, secured=False)},
         "/docs": {"get": _path("Console Swagger UI", _TAG_OPS, secured=False)},

@@ -57,6 +57,9 @@ class BaseConfig:
     # --- Moteur mock ---
     MOCK_SEED = int(os.environ.get("MOCK_SEED", "42"))
 
+    # --- Planificateur (ré-analyse quotidienne + scan d'alertes) ---
+    SCHEDULER_ENABLED = os.environ.get("SCHEDULER_ENABLED", "0") == "1"
+
     # --- Logs ---
     LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 
@@ -75,6 +78,7 @@ class TestConfig(BaseConfig):
         "postgresql+psycopg://cacaosat:cacaosat@localhost:5432/cacaosat_test",
     )
     RATELIMIT_ENABLED = False
+    SCHEDULER_ENABLED = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     SECRET_KEY = "testing-secret-key-not-for-production-use-000"
     JWT_SECRET_KEY = "testing-jwt-secret-key-not-for-production-000"
