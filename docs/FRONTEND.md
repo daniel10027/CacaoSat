@@ -63,9 +63,9 @@
 - [x] **Section Impact** — 4 cartes (économique / social / environnemental / institutionnel) avec micro‑animations.
 - [x] **Section Équipe** — 3 cartes (Timothé, Elie, Daniel) avec rôles.
 - [x] **CTA final** + footer (liens docs, GitHub, mentions données, sélecteur langue).
-- [x] **Perf & SEO** : `<title>` + meta OG/description dans `index.html`, polices Google `display=swap`, **sections sous le pli en `React.lazy`** (chunks 1–7 kB gzip), `ScrollProgress` en `transform` only. *(Audit Lighthouse formel : Lot 11.)*
+- [x] **Perf & SEO** : `<title>` + meta OG/description dans `index.html`, polices Google `display=swap`, **sections sous le pli en `React.lazy`** (chunks 1–7 kB gzip), `ScrollProgress` en `transform` only. *(Audit Lighthouse formel branché au Lot 11 — `lighthouserc.json`, budgets a11y ≥ 0,95 / perf ≥ 0,85 en CI.)*
 - [x] **Responsive** : grilles fluides `clamp()` / flex ; la carte nationale (SVG) s'adapte sans média lourd.
-- [x] Tests Vitest : `StatsBar`, `EudrShock`, `UnderHood` rendent sans erreur (stub `IntersectionObserver` dans `vitest.setup.ts`). *(Playwright e2e : Lot 11.)*
+- [x] Tests Vitest : `StatsBar`, `EudrShock`, `UnderHood` rendent sans erreur (stub `IntersectionObserver` dans `vitest.setup.ts`). *(Playwright e2e `e2e/landing.spec.ts` ajouté au Lot 11.)*
 
 **Definition of Done Lot 5 :** ✅ landing complète (hero parallax + orbite, stats CountUp, choc EUDR, pipeline avec ligne orbitale tracée au scroll, carte nationale live, sources open data, impact + équipe, footer), `prefers-reduced-motion` respecté, `npm run build` OK — **JS initial 148 kB gzip, landing chunk 7.3 kB**, tsc + lint + test (6) verts. Vérifié visuellement au navigateur.
 
@@ -77,7 +77,7 @@
 - [x] Ligne de **KPIs** (`KpiCard` + `CountUp`) : parcelles totales, surface (ha), % conformes, nb à risque, nb non‑conformes, événements de déforestation, surface à haut risque.
 - [x] **Carte des parcelles** (`MapView` MapLibre) : polygones colorés par `eudr_status` (vert/ambre/rouge), popup (code, producteur, surface, score, statut), **fond satellite Esri World Imagery** (sans clé — on voit le couvert forestier), couche aires protégées togglable, `fitBounds` sur les parcelles, `ResizeObserver` + repaint sur `visibilitychange`. *(clustering : Lot 11 si utile.)*
 - [x] **Graphes Recharts** : `ScoreHistogram`, `ComplianceTrend` (aire, % conformes/mois), `RiskDonut` (avec total au centre). *(top producteurs : reporté.)*
-- [x] **File d'alertes** : 6 dernières non acquittées, badge sévérité, « Acquitter » (optimiste + toast), lien vers la parcelle, « Tout voir ». *(SSE : endpoint backend prêt, brancher au Lot 11 ; polling `AlertBell` en place.)*
+- [x] **File d'alertes** : 6 dernières non acquittées, badge sévérité, « Acquitter » (optimiste + toast), lien vers la parcelle, « Tout voir ». *(SSE branché au Lot 11 — `lib/sse.ts` + `useAlertStream` ; polling `AlertBell` conservé en filet de sécurité.)*
 - [x] Sélecteur de coopérative pour les rôles nationaux ; filtres parcelles/alertes dans l'URL (`useSearchParams`).
 
 ### 6.2 Parcelles (`/app/parcelles`, `/app/parcelles/:id`)
@@ -99,9 +99,33 @@
 ### 6.5 Qualité
 - [x] `Skeleton` (chargement), `QueryState` (loading/erreur+retry), `EmptyState`, optimistic UI sur acquittement.
 - [x] `Toaster` global (zustand) — erreurs API en toast.
-- [x] Tests Vitest verts (6) ; `tsc` strict + `eslint` propres (0 erreur). *(Playwright e2e + Lighthouse : Lot 11.)*
+- [x] Tests Vitest verts (6) ; `tsc` strict + `eslint` propres (0 erreur). *(Playwright e2e `e2e/compliance-flow.spec.ts` + Lighthouse ajoutés au Lot 11.)*
 
 **Definition of Done Lot 6 :** ✅ tous les écrans branchés sur l'API réelle et **vérifiés au navigateur** (login → dashboard KPIs + carte satellite Esri + graphes + file d'alertes ; liste parcelles filtrable ; détail parcelle avec jauge de score, ventilation des facteurs et série NDVI ; génération + téléchargement de rapport ; alertes ; producteurs ; méthodologie). `npm run build` OK (charts en chunk lazy 325 kB gzip hors bundle initial), tsc + lint + test verts. **→ jalon M2 : merge `develop → preprod`.**
+
+---
+
+## Lot 11 — Finitions frontend
+
+### 11.1 Alertes temps réel (SSE)
+- [x] `src/lib/sse.ts` — `openEventStream(path, onEvent)` : lecteur SSE `fetch` + `ReadableStream` (permet l'en‑tête `Authorization: Bearer`, impossible avec `EventSource`), reconnexion avec backoff.
+- [x] `src/features/dashboard/useAlertStream.ts` — abonnement `/alerts/stream`, invalidation des requêtes `['alerts']` + toast à chaque nouvelle alerte ; appelé `useAlertStream(true)` dans `DashboardPage`. Le polling `AlertBell` reste en filet de sécurité.
+
+### 11.2 Accessibilité
+- [x] `AppShell` — lien d'évitement `« Aller au contenu »` (`sr-only focus:not-sr-only`), `id="main"` sur `<main>`, `aria-label` sur les `<nav>`.
+- [x] `Dialog` — piège de focus (Tab/Shift+Tab), focus initial sur le panneau, restauration du focus déclencheur à la fermeture, `tabIndex={-1}`.
+- [x] `Toaster` — `role="status" aria-live="polite"`.
+- [x] `LandingNav` — `aria-label="Sections"`.
+
+### 11.3 Tests e2e & audit
+- [x] `playwright.config.ts` + `e2e/fixtures.ts` (`mockApi(page)` intercepte `**/api/v1/**`) — aucun backend requis.
+- [x] `e2e/landing.spec.ts` — la landing charge et défile **sans erreur console**, CTA → `/login`.
+- [x] `e2e/compliance-flow.spec.ts` — login → dashboard → parcelles → détail → analyser → rapport ; garde de rôle `agent`.
+- [x] `lighthouserc.json` — budgets **a11y ≥ 0,95**, **perf ≥ 0,85** (LHCI).
+- [x] `.github/workflows/web.yml` — jobs `build`, `e2e` (Playwright), `lighthouse` (LHCI).
+- [x] Bug réel attrapé par Playwright : `<circle r="undefined">` dans `NationalMap` (Motion `animate={{ r: [...] }}`) → remplacé par SMIL `<animate attributeName="r">`.
+
+**Definition of Done Lot 11 :** ✅ alertes poussées en direct au dashboard (SSE authentifié), parcours e2e Playwright verts sans backend, budgets Lighthouse tenus en CI, corrections d'accessibilité (skip‑link, focus trap, live regions). Entrées critiques toujours en `transition` CSS (jamais cachées en onglet de fond). **→ inclus au jalon M5 (retag `v1.0.0`).**
 
 ---
 
@@ -141,3 +165,4 @@ VITE_APP_ENV=development
 | 2026-09-10 | 4 | `feat(web): socle React + design system CI + auth` | Vite/TS/Tailwind, design system drapeau CI, OrbitCacao animé, client API + refresh JWT, useAuth, AppShell + routing + gardes rôle, i18n fr/en, Login/404, Dockerfile Nginx. build 148 kB gzip, tsc/lint/test verts |
 | 2026-09-10 | 5 | `feat(web): landing immersive (cacao en orbite)` | Hero parallax + orbite, StatsBar CountUp, EudrShock (timeline), Pipeline (ligne orbitale tracée au scroll), NationalMap (SVG CI + agrégats /dashboard/regions live), UnderHood, ImpactTeam, LandingNav sticky, Footer. Sections lazy (1–7 kB). Vérifié au navigateur |
 | 2026-09-10 | 6 | `feat(web): dashboards de conformité` | DashboardPage (KPIs + carte satellite Esri + Recharts + file d'alertes), ParcelsPage (table filtrable), ParcelDetailPage (jauge score + facteurs + NDVI), ReportsPage (Dialog + download PDF/GeoJSON), AlertsPage, ProducersPage, CooperativesPage, Methodology. MapView (MapLibre), charts, Select/Dialog/Toast. **Correctif robustesse : entrées critiques par `transition` CSS et non `animation` (contenu jamais caché onglet en fond).** Vérifié au navigateur |
+| 2026-09-10 | 11 | `feat(web): finitions — SSE alertes, a11y, e2e Playwright` | `lib/sse.ts` + `useAlertStream` (alertes poussées au dashboard, Bearer via fetch/ReadableStream), skip-link + focus trap `Dialog` + live regions, `playwright.config.ts` + `e2e/` (landing sans erreur console, parcours conformité, garde de rôle) avec `mockApi`, `lighthouserc.json` (a11y ≥ 0,95 / perf ≥ 0,85), jobs CI `e2e` + `lighthouse`. Bug SMIL `<circle r>` corrigé |

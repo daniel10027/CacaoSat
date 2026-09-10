@@ -29,7 +29,7 @@ export function LandingNav() {
           <OrbitCacao size={34} spin={!solid} />
           <Wordmark className="text-lg" />
         </a>
-        <nav className="hidden items-center gap-6 text-sm text-sand/60 md:flex">
+        <nav className="hidden items-center gap-6 text-sm text-sand/60 md:flex" aria-label="Sections">
           {LINKS.map((l) => (
             <a key={l.href} href={l.href} className="transition-colors hover:text-white">
               {l.label}

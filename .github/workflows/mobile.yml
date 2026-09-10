@@ -24,9 +24,9 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - run: dart run build_runner build
+      - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter analyze
-      - run: flutter test
+      - run: flutter test --coverage
       - name: Build APK (release)
         run: flutter build apk --release --dart-define=API_BASE_URL=https://api.cacaosat.example
       - uses: actions/upload-artifact@v4

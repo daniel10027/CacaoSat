@@ -5,7 +5,14 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help dev infra-up infra-down infra-logs up prod-up down test lint \
-        seed seed-demo migrate images pitch health clean smoke docs observability stop
+        seed seed-demo migrate images pitch health clean smoke docs observability stop \
+        backup-db restore-db
+
+# Service Compose PostGIS + identifiants (surchargables : make backup-db DB_SERVICE=db)
+DB_SERVICE ?= db
+DB_USER    ?= cacaosat
+DB_NAME    ?= cacaosat
+BACKUP_DIR ?= backups
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -72,6 +79,20 @@ observability: ## Stack + Prometheus + Grafana
 
 stop: ## Arrête tout (services d'appui + process locaux)
 	@./scripts/stop.sh
+
+backup-db: ## Sauvegarde PostGIS -> backups/cacaosat-<horodatage>.dump (pg_dump format custom)
+	@mkdir -p $(BACKUP_DIR)
+	@ts=$$(date +%Y%m%d-%H%M%S); out="$(BACKUP_DIR)/$(DB_NAME)-$$ts.dump"; \
+	 echo "→ pg_dump $(DB_NAME) vers $$out"; \
+	 docker compose exec -T $(DB_SERVICE) pg_dump -U $(DB_USER) -Fc --no-owner $(DB_NAME) > "$$out" && \
+	 echo "✓ $$(du -h "$$out" | cut -f1) écrit dans $$out"
+
+restore-db: ## Restaure un dump : make restore-db FILE=backups/cacaosat-XXXX.dump
+	@test -n "$(FILE)" || { echo "Usage: make restore-db FILE=backups/<fichier>.dump"; exit 2; }
+	@test -f "$(FILE)" || { echo "Introuvable : $(FILE)"; exit 2; }
+	@echo "→ restauration de $(FILE) dans $(DB_NAME) (les objets existants sont remplacés)"
+	@docker compose exec -T $(DB_SERVICE) pg_restore -U $(DB_USER) -d $(DB_NAME) --clean --if-exists --no-owner < "$(FILE)" && \
+	 echo "✓ base restaurée"
 
 clean: ## Nettoie les artefacts de build
 	@rm -rf .dev web/dist backend/.pytest_cache mobile/build

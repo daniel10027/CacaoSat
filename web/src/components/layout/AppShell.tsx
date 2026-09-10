@@ -54,7 +54,7 @@ export function AppShell() {
         <OrbitCacao size={38} />
         <Wordmark className="text-lg" />
       </div>
-      <nav className="flex-1 space-y-1 px-3">
+      <nav className="flex-1 space-y-1 px-3" aria-label="Navigation principale">
         {items.map(({ to, key, icon: Icon }) => (
           <NavLink
             key={to}
@@ -93,6 +93,7 @@ export function AppShell() {
 
   return (
     <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[264px_1fr] bg-night grid-dots">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[70] focus:rounded-lg focus:bg-ci-orange focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-white">Aller au contenu</a>
       <aside className="hidden border-r border-white/10 bg-night-2/60 lg:block">{SideContent}</aside>
 
       <AnimatePresence>
@@ -145,7 +146,7 @@ export function AppShell() {
             <LanguageToggle />
           </div>
         </header>
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+        <main id="main" className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
       </div>

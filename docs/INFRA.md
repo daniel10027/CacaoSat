@@ -43,8 +43,8 @@
 
 ### 9.4 CI — GitHub Actions
 - [x] `.github/workflows/backend.yml` : sur `push`/`PR` touchant `backend/**` → matrice Python 3.12, services `postgis` + `redis`, `ruff check`, `pytest --cov` (seuil 80 %), upload coverage (artefact), `hadolint backend/Dockerfile`
-- [x] `.github/workflows/web.yml` : sur `web/**` → Node 20, `npm ci`, `lint`, `typecheck`, `test` (Vitest), `build`, upload `dist/`. *(Playwright e2e : Lot 11.)*
-- [x] `.github/workflows/mobile.yml` : sur `mobile/**` → `subosito/flutter-action`, `flutter pub get`, `flutter analyze`, `flutter test`, `flutter build apk --release --dart-define=API_BASE_URL=https://api.example` → artefact APK
+- [x] `.github/workflows/web.yml` : sur `web/**` → Node 20, `npm ci`, `lint`, `typecheck`, `test` (Vitest), `build`, upload `dist/` ; jobs **`e2e` (Playwright, backend mocké)** + **`lighthouse` (LHCI, budgets a11y ≥ 0,95 / perf ≥ 0,85)** ajoutés au Lot 11
+- [x] `.github/workflows/mobile.yml` : sur `mobile/**` → `subosito/flutter-action`, `flutter pub get`, `build_runner build --delete-conflicting-outputs`, `flutter analyze`, `flutter test --coverage`, `flutter build apk --release --dart-define=API_BASE_URL=https://api.example` → artefact APK
 - [x] `.github/workflows/images.yml` : sur `push` `develop`/`preprod`/`prod` → build + push images GHCR (`backend`, `web`), scan **Trivy** (échec si CVE `HIGH/CRITICAL` corrigeable), cache layers
 - [x] `.github/workflows/deploy.yml` : `workflow_dispatch` + push `prod` → déploiement (voir 9.5), `environment:` `preprod` / `prod` avec approbation requise pour `prod`
 - [x] `.github/workflows/docs-check.yml` : vérifie qu'aucun lot marqué `[x]` dans les docs n'a de case enfant `[ ]` non justifiée (script `scripts/check_docs.py`) + liens Markdown valides
@@ -53,7 +53,7 @@
 
 ### 9.5 Déploiement (options gratuites, mock‑friendly)
 - [x] Cible par défaut : **un hôte unique** (VPS/poste) via `docker compose --profile prod up -d` piloté par `deploy.yml` en SSH (clé en secret GitHub) — coût nul si auto‑hébergé
-- [x] Alternative free‑tier documentée : `infra/deploy/render.yaml` + `web/netlify.toml` fournis (backend Render/Railway/Fly, web Netlify/Vercel, DB Neon/Supabase) — non requis pour la démo
+- [x] Alternative free‑tier documentée : `infra/deploy/render.yaml`, `infra/deploy/fly.toml` (Fly.io, `release_command = flask db upgrade` + healthcheck) + `web/netlify.toml` fournis (backend Render/Railway/Fly, web Netlify/Vercel, DB Neon/Supabase) — non requis pour la démo
 - [x] `infra/deploy/README.md` + `.env.prod.example` : procédure `docker compose --profile prod pull && up -d && flask db upgrade && curl health` (exécutée par `deploy.yml`) ; TLS via Caddy/nginx documenté
 - [x] Variables/secrets : `infra/deploy/README.md` liste les secrets GitHub (`SSH_HOST`, `SSH_KEY`, `REGISTRY_TOKEN`, `JWT_SECRET_KEY`, …)
 - [x] `preprod` et `prod` = mêmes images, `.env` distinct ; données de démo seedées en `preprod` uniquement
@@ -62,10 +62,11 @@
 - [x] Backend expose `/api/v1/metrics` (Prometheus text) ; `infra/prometheus/prometheus.yml` scrape backend + exporters
 - [x] `infra/grafana/provisioning/` : datasource Prometheus + dashboard « CacaoSat » (parcelles / analyses / alertes / uptime backend, d'après `/api/v1/metrics`)
 - [x] Logs JSON stdout collectés par `docker compose logs` ; doc rotation
-- [x] `make health` (IP LAN + statut conteneurs + `/health/ready`), `make smoke` (e2e), `make docs` (garde‑fou). *(backup-db/restore-db : Lot 11.)*
+- [x] `make health` (IP LAN + statut conteneurs + `/health/ready`), `make smoke` (e2e), `make docs` (garde‑fou)
+- [x] `make backup-db` (`pg_dump -Fc` du conteneur `db` → `backups/cacaosat-<horodatage>.dump`) / `make restore-db FILE=...` (`pg_restore --clean --if-exists`) — surcharges `DB_SERVICE|DB_USER|DB_NAME|BACKUP_DIR` ; procédure dans `infra/deploy/README.md`
 
 ### 9.7 Makefile racine (orchestrateur unique)
-- [x] Cibles : `dev` (→ `scripts/dev.sh`), `infra-up|down|logs`, `up`, `prod-up`, `down`, `stop`, `test`, `lint`, `seed`, `seed-demo`, `migrate`, `images`, `observability`, `smoke`, `docs`, `pitch`, `health`, `clean` (déploiement via `deploy.yml`)
+- [x] Cibles : `dev` (→ `scripts/dev.sh`), `infra-up|down|logs`, `up`, `prod-up`, `down`, `stop`, `test`, `lint`, `seed`, `seed-demo`, `migrate`, `images`, `observability`, `smoke`, `docs`, `pitch`, `health`, `backup-db`, `restore-db`, `clean` (déploiement via `deploy.yml`)
 - [x] `make help` auto‑documenté (parse des commentaires `## `)
 
 **Definition of Done Lot 9 :** ✅ `scripts/dev.sh` détecte l'IP LAN (192.168.x.x) et câble backend/web/mobile dessus (un téléphone du même Wi‑Fi tape l'API sans tunnel) ; **`docker compose up --build` monte toute la stack** (db + redis + mailhog + minio + backend + web + proxy) — vérifié : `/`, `/app/*`, `/api/v1/health/ready`, `/mail/` = 200 via le proxy `:80`, **`scripts/smoke.sh` 10/10** ; 6 workflows GitHub Actions écrits (backend, web, mobile, images→GHCR+Trivy, deploy, docs‑check) ; profil `observability` (Prometheus + Grafana) valide (`docker compose config`). **→ jalon M4 : merge `develop → preprod`.**
@@ -99,3 +100,5 @@
 | Date | Lot | Commit | Note |
 |------|-----|--------|------|
 | — | 0 | `chore(repo): bootstrap` | dossiers `infra/`, `scripts/`, `.github/` réservés |
+| 2026-09-10 | 9 | `feat(infra): compose full-stack, 6 workflows CI, scripts/dev.sh LAN, observabilité` | `docker-compose.yml` (db/redis/mailhog/minio/backend/web/proxy + profils prod/observability), Actions backend/web/mobile/images/deploy/docs-check, `scripts/{dev,lib,lan-info,stop,reset-db,smoke,check_docs}`, Prometheus + Grafana provisionnés, `infra/deploy/` (render.yaml, README, .env.prod.example) |
+| 2026-09-10 | 11 | `chore(infra): finitions — fly.toml, backup/restore DB, CI e2e+lighthouse` | `infra/deploy/fly.toml` (Fly.io, release_command migrations), `make backup-db` / `restore-db` (pg_dump -Fc / pg_restore), `web.yml` jobs `e2e` (Playwright) + `lighthouse` (LHCI), `mobile.yml` `build_runner --delete-conflicting-outputs` + `flutter test --coverage` |

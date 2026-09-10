@@ -26,6 +26,7 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { MapView } from '@/components/map/MapView';
 import { ComplianceTrend, RiskDonut, ScoreHistogram } from '@/components/charts/Charts';
+import { useAlertStream } from '@/features/dashboard/useAlertStream';
 import { fmtHa, fmtInt, fmtPct, relativeTime } from '@/lib/format';
 import type { Cooperative } from '@/types/api';
 
@@ -49,6 +50,7 @@ export default function DashboardPage() {
   const map = useDashboardMap(scope);
   const alerts = useAlerts({ acknowledged: 'false', per_page: 6 });
   const ack = useAcknowledgeAlert();
+  useAlertStream(true);
 
   const protectedAreas = useQuery({
     queryKey: ['protected-areas'],

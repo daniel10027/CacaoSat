@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/theme.dart';
 import '../../data/local/database.dart';
+import '../../core/tile_cache.dart';
 import '../../domain/geo.dart';
 import '../../providers.dart';
 import '../../widgets/common.dart';
@@ -38,6 +39,7 @@ class ParcelDetailScreen extends ConsumerWidget {
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'ci.cacaosat',
+                      tileProvider: sharedTileProvider,
                     ),
                     PolygonLayer(polygons: [
                       Polygon(
