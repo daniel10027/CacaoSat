@@ -85,8 +85,8 @@ export function NationalMap() {
                 stroke="#00A651"
                 strokeWidth="1.5"
                 strokeOpacity="0.5"
-                initial={{ pathLength: 0, opacity: 0 }}
-                whileInView={{ pathLength: 1, opacity: 1 }}
+                initial={{ pathLength: 0 }}
+                whileInView={{ pathLength: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 1.4, ease: 'easeInOut' }}
               />
@@ -115,16 +115,7 @@ export function NationalMap() {
                         transition={{ duration: 3, repeat: Infinity, delay: i * 0.3 }}
                       />
                     )}
-                    <motion.circle
-                      cx={p.x}
-                      cy={p.y}
-                      r={active ? 5.5 : 3}
-                      fill={color}
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: 0.6 + i * 0.1, type: 'spring', stiffness: 300 }}
-                    />
+                    <circle cx={p.x} cy={p.y} r={active ? 5.5 : 3} fill={color} />
                     <text x={p.x + 10} y={p.y + 4} fontSize="9" fill="#F4EAD5" opacity={0.75}>
                       {p.key}
                       {active ? ` · ${r!.parcels}` : ''}

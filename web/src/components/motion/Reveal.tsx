@@ -1,10 +1,13 @@
-import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@/lib/cn';
 
+/**
+ * Apparition au scroll — CSS + IntersectionObserver (pas de rAF).
+ * Le contenu est toujours dans le DOM ; l'animation est une amélioration.
+ */
 export function Reveal({
   children,
   delay = 0,
-  y = 24,
   className,
   once = true,
 }: {
@@ -14,53 +17,51 @@ export function Reveal({
   className?: string;
   once?: boolean;
 }) {
-  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          if (once) io.disconnect();
+        } else if (!once) {
+          setShown(false);
+        }
+      },
+      { rootMargin: '-60px' },
+    );
+    io.observe(el);
+    // Filet de sécurité : ne jamais laisser le contenu caché.
+    const t = window.setTimeout(() => setShown(true), 1600);
+    return () => {
+      io.disconnect();
+      window.clearTimeout(t);
+    };
+  }, [once]);
+
   return (
-    <motion.div
-      className={className}
-      initial={reduce ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once, margin: '-80px' }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
+      ref={ref}
+      className={cn(
+        'transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
+        shown ? 'translate-y-0 opacity-100' : 'translate-y-5 opacity-0 motion-reduce:opacity-100',
+        className,
+      )}
+      style={{ transitionDelay: `${delay}s` }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
-export function Stagger({
-  children,
-  className,
-  gap = 0.08,
-}: {
-  children: ReactNode;
-  className?: string;
-  gap?: number;
-}) {
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: '-60px' }}
-      variants={{ show: { transition: { staggerChildren: gap } } }}
-    >
-      {children}
-    </motion.div>
-  );
+export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={className}>{children}</div>;
 }
 
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: reduce ? {} : { opacity: 0, y: 18 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <Reveal className={className}>{children}</Reveal>;
 }

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { useScroll, useMotionValueEvent } from 'framer-motion';
 import { cn } from '@/lib/cn';
 import { OrbitCacao } from '@/components/brand/OrbitCacao';
 import { Wordmark } from '@/components/brand/Wordmark';
@@ -16,16 +16,12 @@ export function LandingNav() {
   const { scrollY } = useScroll();
   const [solid, setSolid] = useState(false);
   useMotionValueEvent(scrollY, 'change', (v) => setSolid(v > 40));
-  useEffect(() => () => {}, []);
 
   return (
-    <motion.header
-      initial={{ y: -40, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
+    <header
       className={cn(
         'fixed inset-x-0 top-0 z-40 transition-colors duration-300',
-        solid ? 'border-b border-white/10 bg-night/80 backdrop-blur' : 'bg-transparent',
+        solid ? 'border-b border-white/10 bg-night/90 backdrop-blur' : 'bg-transparent',
       )}
     >
       <div className="container-page flex items-center justify-between py-4">
@@ -47,6 +43,6 @@ export function LandingNav() {
           Espace coopérative
         </Link>
       </div>
-    </motion.header>
+    </header>
   );
 }

@@ -1,16 +1,9 @@
 import type { ReactNode } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 
+/**
+ * Passe-plat : le contenu des pages ne doit jamais dépendre d'une animation pour
+ * être visible. Le mouvement d'entrée vit dans les composants `Reveal` internes.
+ */
 export function PageTransition({ children }: { children: ReactNode }) {
-  const reduce = useReducedMotion();
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={reduce ? undefined : { opacity: 0, y: -8 }}
-      transition={{ duration: 0.28, ease: 'easeOut' }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <>{children}</>;
 }

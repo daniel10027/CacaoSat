@@ -5,6 +5,7 @@ import { queryClient } from '@/lib/queryClient';
 import { router } from '@/routes';
 import { useAuth } from '@/features/auth/useAuth';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Toaster } from '@/components/ui/Toast';
 import '@/i18n';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
+        <Toaster />
       </QueryClientProvider>
     </ErrorBoundary>
   );

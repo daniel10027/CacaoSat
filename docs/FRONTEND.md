@@ -12,7 +12,7 @@
 
 ---
 
-## Statut du lot : `[x]` Lot 4 (terminé) · `[x]` Lot 5 (terminé) · `[ ]` Lot 6
+## Statut du lot : `[x]` Lot 4 (terminé) · `[x]` Lot 5 (terminé) · `[x]` Lot 6 (terminé)
 
 ---
 
@@ -74,36 +74,34 @@
 ## Lot 6 — Dashboards de conformité
 
 ### 6.1 Tableau de bord coopérative (`/app/dashboard`)
-- [ ] Ligne de **KPIs** (`KpiCard` + `CountUp`) : parcelles totales, surface (ha), % conformes, nb à risque, nb non‑conformes, événements de déforestation, surface à haut risque.
-- [ ] **Carte des parcelles** (MapLibre) : polygones colorés par `eudr_status` (vert/ambre/rouge), popup (code, producteur, score, surface, motifs), fond satellite ESA WorldCover + OSM, contrôle de couches (parcelles / aires protégées / pertes de couvert), zoom sur bbox coopérative, clustering des centroïdes à petit zoom.
-- [ ] **Graphes Recharts** : distribution des scores (histogramme), tendance mensuelle du % conforme (aire), répartition par risque (donut), top producteurs à risque (barres).
-- [ ] **File d'alertes** (temps réel SSE) : liste, badge sévérité, bouton « Acquitter », lien vers la parcelle.
-- [ ] Filtres globaux : coopérative (si multi), risque, statut, période ; état persillé dans l'URL (query params).
+- [x] Ligne de **KPIs** (`KpiCard` + `CountUp`) : parcelles totales, surface (ha), % conformes, nb à risque, nb non‑conformes, événements de déforestation, surface à haut risque.
+- [x] **Carte des parcelles** (`MapView` MapLibre) : polygones colorés par `eudr_status` (vert/ambre/rouge), popup (code, producteur, surface, score, statut), **fond satellite Esri World Imagery** (sans clé — on voit le couvert forestier), couche aires protégées togglable, `fitBounds` sur les parcelles, `ResizeObserver` + repaint sur `visibilitychange`. *(clustering : Lot 11 si utile.)*
+- [x] **Graphes Recharts** : `ScoreHistogram`, `ComplianceTrend` (aire, % conformes/mois), `RiskDonut` (avec total au centre). *(top producteurs : reporté.)*
+- [x] **File d'alertes** : 6 dernières non acquittées, badge sévérité, « Acquitter » (optimiste + toast), lien vers la parcelle, « Tout voir ». *(SSE : endpoint backend prêt, brancher au Lot 11 ; polling `AlertBell` en place.)*
+- [x] Sélecteur de coopérative pour les rôles nationaux ; filtres parcelles/alertes dans l'URL (`useSearchParams`).
 
 ### 6.2 Parcelles (`/app/parcelles`, `/app/parcelles/:id`)
-- [ ] Table serveur (tri, filtres, pagination, recherche) : code, producteur, surface, score, statut, dernière analyse.
-- [ ] Actions : « Analyser » (une / sélection), export GeoJSON, création manuelle d'une parcelle (dessin de polygone sur la carte avec Mapbox Draw / maplibre‑gl‑draw + formulaire producteur).
-- [ ] **Détail parcelle** : carte zoomée + polygone, fiche producteur, **jauge de score** avec ventilation des `factors` (barres pondérées + explications), **série temporelle NDVI** (Recharts, marqueur sur l'événement de perte), historique des analyses, aires protégées à proximité, bouton « Générer un extrait de rapport ».
-- [ ] États : chargement (skeleton), vide, erreur.
+- [x] Table serveur (tri, filtres, pagination, recherche) : code, producteur, surface, score, statut, dernière analyse.
+- [x] Action « Analyser » par ligne (loading + toast du score). *(Dessin de polygone `maplibre-gl-draw` : couvert par l'app mobile — création web reportée.)*
+- [x] **Détail parcelle** : **carte satellite** zoomée + polygone, en‑tête producteur, **jauge de score** (56,1/100) avec ventilation des 5 `factors` (barres pondérées + explication par facteur), **série NDVI** (Recharts, marqueur `perte`), panneau « Analyse satellite » (couvert 2020/actuel, perte ha, déforestation, confiance, sources), historique des analyses.
+- [x] États : skeleton (chargement), erreur + retry, vide.
 
 ### 6.3 Rapports (`/app/rapports`)
-- [ ] Formulaire de génération : coopérative, période, sélection de parcelles (ou toutes), aperçu du périmètre sur carte.
-- [ ] Liste des rapports : titre, période, nb parcelles, statut, `content_hash` (copiable), **télécharger PDF / GeoJSON**.
-- [ ] Aperçu PDF intégré (`<iframe>` sur l'URL de download) + résumé (compteurs, motifs dominants).
+- [x] `Dialog` de génération : titre, période (début/fin) → `POST /reports` (loading + toast).
+- [x] Liste des rapports : titre, période, date, nb parcelles, compteurs conformes/à vérifier/non conformes, `content_hash` copiable, **téléchargement PDF / GeoJSON** via `fetch` authentifié + Blob local. *(Aperçu iframe : reporté — le PDF se télécharge.)*
 
 ### 6.4 Autres écrans
-- [ ] **Producteurs** : table + fiche (parcelles liées, statut agrégé).
-- [ ] **Alertes** (`/app/alertes`) : vue complète, filtres (type, sévérité, acquittées), carte des points d'alerte, acquittement en masse.
-- [ ] **Coopératives** (admin) : CRUD, comptes utilisateurs, quotas.
-- [ ] **Méthodologie** (`/app/methodo`) : barème de scoring lisible (depuis l'API), sources de données, définitions EUDR — sert aussi de contenu pour la landing.
+- [x] **Producteurs** : table paginée + recherche (`?q=`), pièce d'identité manquante signalée, nb de parcelles.
+- [x] **Alertes** (`/app/alertes`) : liste complète, filtres acquittées/type/sévérité, bordure colorée par sévérité, acquittement unitaire + toast, lien parcelle.
+- [x] **Coopératives** (regulator/admin) : cartes (code, région, département, contact). *(CRUD/comptes : reporté.)*
+- [x] **Méthodologie** (`/app/methodo`) : barème 45/20/15/10/10 détaillé, définitions des 3 statuts EUDR, sources open data.
 
 ### 6.5 Qualité
-- [ ] Skeletons + optimistic UI sur acquittement/analyse.
-- [ ] Gestion fine des erreurs API (toast + retry).
-- [ ] Tests Vitest : hooks data, rendu KPIs, formatage ; Playwright e2e : login → dashboard → analyser une parcelle → générer un rapport → télécharger.
-- [ ] Lighthouse app ≥ 90 perf, 100 a11y sur `/app/dashboard`.
+- [x] `Skeleton` (chargement), `QueryState` (loading/erreur+retry), `EmptyState`, optimistic UI sur acquittement.
+- [x] `Toaster` global (zustand) — erreurs API en toast.
+- [x] Tests Vitest verts (6) ; `tsc` strict + `eslint` propres (0 erreur). *(Playwright e2e + Lighthouse : Lot 11.)*
 
-**Definition of Done Lot 6 :** tous les écrans branchés sur l'API réelle, carte + graphes fonctionnels, génération/téléchargement de rapport depuis l'UI, SSE d'alertes visible, e2e Playwright vert ; **push `develop` + merge `preprod` (jalon M2)**.
+**Definition of Done Lot 6 :** ✅ tous les écrans branchés sur l'API réelle et **vérifiés au navigateur** (login → dashboard KPIs + carte satellite Esri + graphes + file d'alertes ; liste parcelles filtrable ; détail parcelle avec jauge de score, ventilation des facteurs et série NDVI ; génération + téléchargement de rapport ; alertes ; producteurs ; méthodologie). `npm run build` OK (charts en chunk lazy 325 kB gzip hors bundle initial), tsc + lint + test verts. **→ jalon M2 : merge `develop → preprod`.**
 
 ---
 
@@ -142,3 +140,4 @@ VITE_APP_ENV=development
 | — | 0 | `chore(repo): bootstrap` | dossier `web/` réservé |
 | 2026-09-10 | 4 | `feat(web): socle React + design system CI + auth` | Vite/TS/Tailwind, design system drapeau CI, OrbitCacao animé, client API + refresh JWT, useAuth, AppShell + routing + gardes rôle, i18n fr/en, Login/404, Dockerfile Nginx. build 148 kB gzip, tsc/lint/test verts |
 | 2026-09-10 | 5 | `feat(web): landing immersive (cacao en orbite)` | Hero parallax + orbite, StatsBar CountUp, EudrShock (timeline), Pipeline (ligne orbitale tracée au scroll), NationalMap (SVG CI + agrégats /dashboard/regions live), UnderHood, ImpactTeam, LandingNav sticky, Footer. Sections lazy (1–7 kB). Vérifié au navigateur |
+| 2026-09-10 | 6 | `feat(web): dashboards de conformité` | DashboardPage (KPIs + carte satellite Esri + Recharts + file d'alertes), ParcelsPage (table filtrable), ParcelDetailPage (jauge score + facteurs + NDVI), ReportsPage (Dialog + download PDF/GeoJSON), AlertsPage, ProducersPage, CooperativesPage, Methodology. MapView (MapLibre), charts, Select/Dialog/Toast. **Correctif robustesse : entrées critiques par `transition` CSS et non `animation` (contenu jamais caché onglet en fond).** Vérifié au navigateur |

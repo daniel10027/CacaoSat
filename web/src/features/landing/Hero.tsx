@@ -16,7 +16,6 @@ export function Hero() {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
   const lift = useTransform(scrollYProgress, [0, 1], [0, -80]);
 
   const mx = useSpring(useMotionValue(0), { stiffness: 60, damping: 20 });
@@ -37,7 +36,6 @@ export function Hero() {
       onMouseMove={onMove}
       className="relative flex min-h-[100svh] items-center overflow-hidden"
     >
-      {/* fonds */}
       <div className="absolute inset-0 bg-gradient-to-b from-night via-canopy to-night" />
       <div className="absolute inset-0 grid-dots opacity-40" />
       <motion.div
@@ -47,46 +45,28 @@ export function Hero() {
       />
       <div className="absolute -right-40 bottom-0 h-[50vh] w-[50vh] rounded-full bg-ci-orange/12 blur-[120px]" />
 
-      <motion.div
-        className="container-page relative grid items-center gap-10 py-24 md:grid-cols-[1.05fr_0.95fr]"
-        style={reduce ? undefined : { opacity: fade }}
-      >
+      <div className="container-page relative grid items-center gap-10 py-24 md:grid-cols-[1.05fr_0.95fr]">
         <div>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-ci-orange"
-          >
+          <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-ci-orange">
             <Radar size={13} /> Le spatial pour bâtir
-          </motion.p>
+          </p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+          <h1
             className="mt-5 font-display text-[clamp(3rem,9vw,6.5rem)] font-extrabold leading-[0.95]"
           >
             <span className="text-ci-orange">CACAO</span>
             <span className="text-ci-green">SAT</span>
-          </motion.h1>
+          </h1>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+          <p
             className="mt-6 max-w-xl text-lg text-sand/75 sm:text-xl"
           >
             Traçabilité géospatiale du cacao ivoirien : mettre les données satellites libres au
             service de la <span className="text-white">conformité EUDR</span> et des coopératives
             locales.
-          </motion.p>
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.25 }}
-          >
+          <div>
             <FlagRibbon className="mt-7 w-44" />
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -103,7 +83,7 @@ export function Hero() {
                 Comprendre l'EUDR
               </a>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <motion.div
@@ -113,18 +93,16 @@ export function Hero() {
           <div className="absolute inset-0 rounded-full bg-ci-orange/10 blur-3xl" />
           <OrbitCacao size={420} className="max-w-full" />
         </motion.div>
-      </motion.div>
+      </div>
 
-      <motion.div
+      <div
         aria-hidden
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sand/40"
-        animate={reduce ? undefined : { y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sand/40 motion-safe:animate-float-y"
       >
         <div className="h-9 w-5 rounded-full border border-white/20 p-1">
           <div className="h-2 w-full rounded-full bg-white/40" />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

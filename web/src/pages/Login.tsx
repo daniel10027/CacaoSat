@@ -1,7 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/features/auth/useAuth';
 import { ApiError } from '@/lib/api';
@@ -47,12 +46,7 @@ export default function Login() {
       <div className="pointer-events-none absolute -left-40 top-1/2 h-[520px] w-[520px] -translate-y-1/2 rounded-full bg-ci-green/10 blur-3xl" />
       <div className="pointer-events-none absolute -right-40 top-10 h-[420px] w-[420px] rounded-full bg-ci-orange/10 blur-3xl" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative w-full max-w-md rounded-2xl2 border border-white/10 bg-night-2/80 p-8 shadow-card backdrop-blur"
-      >
+      <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-night-2 p-8 shadow-card">
         <div className="mb-6 flex flex-col items-center text-center">
           <OrbitCacao size={120} />
           <Wordmark className="mt-3 text-2xl" />
@@ -111,7 +105,7 @@ export default function Login() {
         >
           ← Retour au site
         </Link>
-      </motion.div>
+      </div>
     </div>
   );
 }
