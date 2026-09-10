@@ -5,7 +5,7 @@ SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
 .PHONY: help dev infra-up infra-down infra-logs up prod-up down test lint \
-        seed seed-demo migrate images pitch health clean
+        seed seed-demo migrate images pitch health clean smoke docs observability stop
 
 help: ## Affiche cette aide
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -58,8 +58,20 @@ images: ## Construit les images Docker backend + web
 pitch: ## Régénère le support de pitch (PPTX + PDF)
 	@python3 pitch/build_deck.py
 
-health: ## Vérifie la santé des services
+health: ## Vérifie la santé des services (IP LAN + statuts)
 	@./scripts/lan-info.sh || true
+
+smoke: ## Smoke test e2e contre http://localhost
+	@./scripts/smoke.sh $(BASE)
+
+docs: ## Vérifie la cohérence des docs de suivi
+	@python3 scripts/check_docs.py
+
+observability: ## Stack + Prometheus + Grafana
+	@docker compose --profile observability up -d --build
+
+stop: ## Arrête tout (services d'appui + process locaux)
+	@./scripts/stop.sh
 
 clean: ## Nettoie les artefacts de build
 	@rm -rf .dev web/dist backend/.pytest_cache mobile/build

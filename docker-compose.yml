@@ -88,6 +88,50 @@ services:
       - "8000:8000"
     restart: unless-stopped
 
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api/v1}
+    depends_on: [backend]
+    expose:
+      - "80"
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:1.27-alpine
+    depends_on: [web, backend, mailhog]
+    ports:
+      - "${PROXY_PORT:-80}:80"
+    volumes:
+      - ./infra/nginx/proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+  # --- Observabilité (profil optionnel) ---
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: ["observability"]
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-cacaosat}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafanadata:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
 volumes:
   pgdata:
   miniodata:
+  grafanadata:

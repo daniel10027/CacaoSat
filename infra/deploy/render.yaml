@@ -1,0 +1,26 @@
+# Déploiement de référence sur Render (free tier). Non requis pour la démo.
+services:
+  - type: web
+    name: cacaosat-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/v1/health/ready
+    envVars:
+      - key: FLASK_CONFIG
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cacaosat-db
+          property: connectionString
+      - key: SEED_ON_START
+        value: "1"
+
+databases:
+  - name: cacaosat-db
+    plan: free
+    postgresMajorVersion: "16"

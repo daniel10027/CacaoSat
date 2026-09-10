@@ -8,6 +8,13 @@
   <img src="web/src/assets/logo-cacaosat.png" alt="CacaoSat — un cacao en orbite" width="180" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/daniel10027/CacaoSat/actions/workflows/backend.yml"><img src="https://github.com/daniel10027/CacaoSat/actions/workflows/backend.yml/badge.svg?branch=develop" alt="backend" /></a>
+  <a href="https://github.com/daniel10027/CacaoSat/actions/workflows/web.yml"><img src="https://github.com/daniel10027/CacaoSat/actions/workflows/web.yml/badge.svg?branch=develop" alt="web" /></a>
+  <a href="https://github.com/daniel10027/CacaoSat/actions/workflows/mobile.yml"><img src="https://github.com/daniel10027/CacaoSat/actions/workflows/mobile.yml/badge.svg?branch=develop" alt="mobile" /></a>
+  <a href="https://github.com/daniel10027/CacaoSat/actions/workflows/docs-check.yml"><img src="https://github.com/daniel10027/CacaoSat/actions/workflows/docs-check.yml/badge.svg?branch=develop" alt="docs" /></a>
+</p>
+
 ---
 
 ## 🌍 Le problème
