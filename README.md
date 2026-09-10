@@ -58,6 +58,27 @@ Un **pipeline de traçabilité géospatiale** qui relie la donnée de terrain à
 
 **Tout est containerisé (Docker), déployé en CI/CD (GitHub Actions), et 100 % basé sur des outils libres et gratuits.** Les services externes (imagerie satellite, e‑mail, SMS, stockage objet) sont **mockés de façon déterministe** pour une démo reproductible.
 
+## 🖼️ Aperçu
+
+| Landing | Tableau de bord | Détail parcelle |
+|---|---|---|
+| ![Landing](docs/screenshots/landing-hero.jpg) | ![Dashboard](docs/screenshots/dashboard.jpg) | ![Détail parcelle](docs/screenshots/parcel-detail.jpg) |
+
+Le détail d'une parcelle montre la carte satellite (Esri, sans clé — on voit le couvert forestier),
+la jauge de score EUDR et la **ventilation des 5 facteurs** avec leur explication, ainsi que la
+série NDVI Sentinel‑2. [Autres captures →](docs/screenshots/)
+
+## ✅ État d'avancement
+
+| Lot | Livrable | Statut |
+|-----|----------|:------:|
+| 1–3 | **Backend** Flask + PostGIS — API (34 routes), moteur satellite mock, scoring EUDR explicable, rapports PDF/GeoJSON, alertes, sync mobile | ✅ 76 tests · 84 % |
+| 4–6 | **Web** React — landing immersive + dashboards (carte satellite, KPIs, rapports, alertes) | ✅ tsc/lint/test verts |
+| 7–8 | **Mobile** Flutter — collecte GPS hors‑ligne (3 modes), sync différée idempotente | ✅ analyze 0 · 12 tests |
+| 9 | **Infra** — `docker compose up` (7 services + proxy), `scripts/dev.sh`, 6 workflows CI | ✅ smoke e2e 10/10 |
+| 10 | **Pitch** — deck 5 min PPTX + PDF + script minuté | ✅ `make pitch` |
+| 11 | Durcissement, seed démo curated, release `v1.0.0` | ✅ |
+
 ## 📦 Monorepo
 
 | Dossier | Contenu | Stack |

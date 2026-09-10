@@ -22,8 +22,25 @@ SCENARIOS = ("compliant", "at_risk", "deforested")
 # Pondération de tirage : la majorité des parcelles sont conformes.
 _WEIGHTS = (0.62, 0.26, 0.12)
 
-# Forcer un scénario pour certaines parcelles (démo).
+# Forcer un scénario pour certaines parcelles (tests — vidé entre chaque test).
 SCENARIO_OVERRIDES: dict[str, str] = {}
+
+# Scénario curated par code de parcelle — fige une histoire de démo cohérente et
+# reproductible (survit aux redémarrages, contrairement à SCENARIO_OVERRIDES).
+# Codes générés par `flask seed-demo` : <COOP>-0001, 0002, …
+CURATED_BY_CODE: dict[str, str] = {
+    # Coopérative de Guiglo : quelques cas nets à régulariser
+    "COOPCA-GUIGLO-0005": "deforested",
+    "COOPCA-GUIGLO-0007": "deforested",
+    "COOPCA-GUIGLO-0011": "at_risk",
+    "COOPCA-GUIGLO-0014": "at_risk",
+    "COOPCA-GUIGLO-0018": "deforested",  # + recoupe la Forêt classée du Cavally
+    "COOPCA-GUIGLO-0019": "at_risk",
+    # Coopérative de Taï : dossier plus sain
+    "SCOOP-TAI-0026": "deforested",  # recoupe la Forêt classée du Goin-Débé
+    "SCOOP-TAI-0031": "at_risk",
+    "SCOOP-TAI-0037": "at_risk",
+}
 
 
 @dataclass(frozen=True)
@@ -46,6 +63,8 @@ class Scenario:
 def resolve(parcel_id: object, parcel_code: str | None = None) -> Scenario:
     if parcel_code and parcel_code in SCENARIO_OVERRIDES:
         name = SCENARIO_OVERRIDES[parcel_code]
+    elif parcel_code and parcel_code in CURATED_BY_CODE:
+        name = CURATED_BY_CODE[parcel_code]
     else:
         rng = seeded_rng("scenario", parcel_id)
         name = str(rng.choice(SCENARIOS, p=_WEIGHTS))
