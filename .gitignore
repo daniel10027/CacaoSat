@@ -54,3 +54,8 @@ miniodata/
 
 # --- Generated pitch exports (keep sources, ignore scratch) ---
 pitch/*.tmp
+
+# Playwright
+web/playwright-report/
+web/test-results/
+web/blob-report/
