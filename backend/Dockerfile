@@ -29,7 +29,13 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 COPY . .
-RUN chmod +x entrypoint.sh && chown -R app:app /app
+# `sed` retire d'éventuels CR : un checkout Windows en CRLF rendrait le
+# shebang illisible (« env: 'sh\r': No such file or directory ») et le
+# heredoc du script non terminé. .gitattributes empêche le cas en amont,
+# ceci garantit que l'image démarre même sur un clone mal configuré.
+RUN sed -i 's/\r$//' entrypoint.sh \
+ && chmod +x entrypoint.sh \
+ && chown -R app:app /app
 
 USER app
 EXPOSE 8000
