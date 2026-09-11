@@ -5,10 +5,14 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import logging
+import math
 from datetime import UTC, date, datetime
 
 from geoalchemy2.shape import to_shape
-from reportlab.graphics.shapes import Drawing, String
+from PIL import Image as PILImage
+from reportlab.graphics.shapes import Drawing, Line, Rect, String
+from reportlab.graphics.shapes import Image as RLImage
 from reportlab.graphics.shapes import Polygon as RLPolygon
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
@@ -28,7 +32,10 @@ from app.extensions import db
 from app.models.compliance_report import ComplianceReport
 from app.models.cooperative import Cooperative
 from app.models.parcel import Parcel
+from app.services import basemap as basemap_service
 from app.storage import put_object
+
+log = logging.getLogger(__name__)
 
 CI_ORANGE = colors.HexColor("#FF7A00")
 CI_GREEN = colors.HexColor("#00A651")
@@ -150,36 +157,128 @@ def _geojson(rows: list[dict], coop: Cooperative) -> bytes:
     return json.dumps(fc, ensure_ascii=False, indent=2).encode("utf-8")
 
 
-def _map_drawing(rows: list[dict], width=170 * mm, height=95 * mm) -> Drawing:
+def _merc_y(lat: float) -> float:
+    """Ordonnée Web Mercator normalisée (0 au pôle nord, 1 au pôle sud)."""
+    lat = max(min(lat, basemap_service.MAX_LAT), -basemap_service.MAX_LAT)
+    s = math.sin(math.radians(lat))
+    return 0.5 - math.log((1 + s) / (1 - s)) / (4 * math.pi)
+
+
+def _merc_y_inv(y: float) -> float:
+    return math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * y))))
+
+
+def _framed_bbox(geoms: list, aspect: float) -> tuple[float, float, float, float]:
+    """Emprise (west, south, east, north) marginée et mise au ratio du cadre.
+
+    L'ajustement se fait en espace Mercator, celui des tuiles : l'image remplit
+    donc le cadre sans déformation, et les parcelles restent centrées.
+    """
+    minx = min(g.bounds[0] for g in geoms)
+    miny = min(g.bounds[1] for g in geoms)
+    maxx = max(g.bounds[2] for g in geoms)
+    maxy = max(g.bounds[3] for g in geoms)
+    # Marge relative, avec un plancher absolu : une coopérative réduite à une
+    # seule parcelle aurait sinon une emprise quasi nulle et un zoom absurde.
+    dx = max((maxx - minx) * 0.15, 0.0012)
+    dy = max((maxy - miny) * 0.15, 0.0012)
+
+    x0, x1 = (minx - dx + 180) / 360, (maxx + dx + 180) / 360
+    y0, y1 = _merc_y(maxy + dy), _merc_y(miny - dy)  # y0 (nord) < y1 (sud)
+    w, h = x1 - x0, y1 - y0
+    if w / h < aspect:
+        target = h * aspect
+        cx = (x0 + x1) / 2
+        x0, x1 = cx - target / 2, cx + target / 2
+    else:
+        target = w / aspect
+        cy = (y0 + y1) / 2
+        y0, y1 = cy - target / 2, cy + target / 2
+    return (x0 * 360 - 180, _merc_y_inv(y1), x1 * 360 - 180, _merc_y_inv(y0))
+
+
+def _scale_bar(d: Drawing, metres_per_point: float, width: float, on_imagery: bool) -> None:
+    """Échelle graphique : sans elle, une carte sans repère n'est pas lisible."""
+    if metres_per_point <= 0:
+        return
+    ink = colors.white if on_imagery else colors.HexColor("#333333")
+    for metres in (5000, 2000, 1000, 500, 200, 100):
+        length = metres / metres_per_point
+        if length <= width * 0.3:
+            break
+    else:  # pragma: no cover — emprise extrêmement réduite
+        return
+    x, y = 8, 8
+    d.add(Line(x, y, x + length, y, strokeColor=ink, strokeWidth=1.2))
+    for end in (x, x + length):
+        d.add(Line(end, y - 2.5, end, y + 2.5, strokeColor=ink, strokeWidth=1.2))
+    label = f"{metres / 1000:g} km" if metres >= 1000 else f"{metres:g} m"
+    d.add(String(x, y + 4.5, label, fontSize=7, fillColor=ink))
+
+
+def _map_drawing(rows: list[dict], width=170 * mm, height=120 * mm) -> Drawing:
     d = Drawing(width, height)
     geoms = [r["geometry"] for r in rows if r["geometry"] and not r["geometry"].is_empty]
     if not geoms:
         d.add(String(10, height / 2, "Aucune géométrie à afficher", fontSize=9))
         return d
-    minx = min(g.bounds[0] for g in geoms)
-    miny = min(g.bounds[1] for g in geoms)
-    maxx = max(g.bounds[2] for g in geoms)
-    maxy = max(g.bounds[3] for g in geoms)
-    pad = 6
-    sx = (width - 2 * pad) / (maxx - minx or 1e-6)
-    sy = (height - 2 * pad) / (maxy - miny or 1e-6)
-    s = min(sx, sy)
 
-    def project(x, y):
-        return (pad + (x - minx) * s, pad + (y - miny) * s)
+    west, south, east, north = _framed_bbox(geoms, width / height)
+    try:
+        bm = basemap_service.build((west, south, east, north))
+    except Exception as exc:  # noqa: BLE001 — un fond absent ne doit jamais bloquer un rapport
+        log.info("fond de carte indisponible (%s)", exc)
+        bm = None
 
+    if bm is not None:
+        # renderPDF n'accepte qu'un chemin ou un objet exposant `.mode` :
+        # un ImageReader y échoue, l'image PIL passe directement.
+        d.add(RLImage(0, 0, width, height, PILImage.open(io.BytesIO(bm.png))))
+
+        def project(lon: float, lat: float) -> tuple[float, float]:
+            u, v = bm.project(lon, lat)
+            return u * width, (1 - v) * height
+
+        metres_per_point = bm.metres_per_pixel((south + north) / 2) * bm.width_px / width
+    else:
+        d.add(Rect(0, 0, width, height, fillColor=colors.HexColor("#EEF2EC"), strokeColor=None))
+        mx0, mx1 = (west + 180) / 360, (east + 180) / 360
+        my0, my1 = _merc_y(north), _merc_y(south)
+
+        def project(lon: float, lat: float) -> tuple[float, float]:
+            u = ((lon + 180) / 360 - mx0) / (mx1 - mx0)
+            v = (_merc_y(lat) - my0) / (my1 - my0)
+            return u * width, (1 - v) * height
+
+        metres_per_point = (north - south) * 111_320 / height
+
+    # Sur imagerie, un remplissage opaque masquerait le couvert : on laisse
+    # transparaître le fond tout en gardant le statut lisible.
+    alpha = 0.55 if bm is not None else 1.0
+    edge = colors.white if bm is not None else colors.HexColor("#FFFFFF")
     for r in rows:
         g = r["geometry"]
         if g is None or g.is_empty:
             continue
         polys = list(g.geoms) if g.geom_type == "MultiPolygon" else [g]
-        col = STATUS_COLORS.get(r["eudr_status"], STATUS_COLORS["unassessed"])
+        base = STATUS_COLORS.get(r["eudr_status"], STATUS_COLORS["unassessed"])
+        col = colors.Color(base.red, base.green, base.blue, alpha=alpha)
         for poly in polys:
             pts: list[float] = []
-            for x, y in poly.exterior.coords:
-                px, py = project(x, y)
+            for lon, lat in poly.exterior.coords:
+                px, py = project(lon, lat)
                 pts.extend([px, py])
-            d.add(RLPolygon(pts, fillColor=col, strokeColor=colors.white, strokeWidth=0.4))
+            d.add(RLPolygon(pts, fillColor=col, strokeColor=edge, strokeWidth=0.9))
+
+    _scale_bar(d, metres_per_point, width, on_imagery=bm is not None)
+    if bm is not None and bm.attribution:
+        d.add(
+            String(
+                width - 4, 8, bm.attribution, fontSize=6,
+                fillColor=colors.white, textAnchor="end",
+            )
+        )
+    d.add(Rect(0, 0, width, height, fillColor=None, strokeColor=colors.HexColor("#B9C2B4"), strokeWidth=0.6))
     return d
 
 
