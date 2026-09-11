@@ -122,8 +122,14 @@ export const useReports = () =>
 export const useCreateReport = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: { period_start: string; period_end: string; title?: string }) =>
-      api<ComplianceReport>('/reports', { method: 'POST', body }),
+    mutationFn: (body: {
+      period_start: string;
+      period_end: string;
+      title?: string;
+      // Obligatoire pour les rôles à portée nationale : leur token ne porte
+      // aucune coopérative, l'API ne peut donc pas la déduire.
+      cooperative_id?: string;
+    }) => api<ComplianceReport>('/reports', { method: 'POST', body }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['reports'] });
     },

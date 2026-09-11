@@ -57,6 +57,23 @@ class BaseConfig:
     # --- Moteur mock ---
     MOCK_SEED = int(os.environ.get("MOCK_SEED", "42"))
 
+    # --- Fond de carte du PDF de conformité ---
+    # Tuiles raster Web Mercator ; `{z}/{y}/{x}` est l'ordre attendu par Esri.
+    # Le rapport reste générable si le service est injoignable : on retombe
+    # alors sur le rendu vectoriel. Mettre REPORT_BASEMAP_ENABLED=0 pour un
+    # déploiement sans accès sortant.
+    REPORT_BASEMAP_ENABLED = os.environ.get("REPORT_BASEMAP_ENABLED", "1") == "1"
+    REPORT_BASEMAP_URL = os.environ.get(
+        "REPORT_BASEMAP_URL",
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    )
+    REPORT_BASEMAP_ATTRIBUTION = os.environ.get(
+        "REPORT_BASEMAP_ATTRIBUTION", "Fond : Esri World Imagery — Esri, Maxar, Earthstar Geographics"
+    )
+    REPORT_BASEMAP_TIMEOUT = float(os.environ.get("REPORT_BASEMAP_TIMEOUT", "6"))
+    REPORT_BASEMAP_BUDGET = float(os.environ.get("REPORT_BASEMAP_BUDGET", "20"))
+    REPORT_BASEMAP_CACHE_DIR = os.environ.get("REPORT_BASEMAP_CACHE_DIR", "")
+
     # --- Planificateur (ré-analyse quotidienne + scan d'alertes) ---
     SCHEDULER_ENABLED = os.environ.get("SCHEDULER_ENABLED", "0") == "1"
 
@@ -79,6 +96,8 @@ class TestConfig(BaseConfig):
     )
     RATELIMIT_ENABLED = False
     SCHEDULER_ENABLED = False
+    # Aucun appel sortant dans la suite de tests.
+    REPORT_BASEMAP_ENABLED = False
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
     SECRET_KEY = "testing-secret-key-not-for-production-use-000"
     JWT_SECRET_KEY = "testing-jwt-secret-key-not-for-production-000"
