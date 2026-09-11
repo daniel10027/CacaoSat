@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Copy, Download, FileText, Plus } from 'lucide-react';
-import { useCreateReport, useReports } from '@/features/dashboard/queries';
+import { useCooperatives, useCreateReport, useReports } from '@/features/dashboard/queries';
+import { useAuth } from '@/features/auth/useAuth';
 import { Page, PageHeader, QueryState } from '@/components/ui/Page';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
 import { Dialog } from '@/components/ui/Dialog';
 import { Field } from '@/components/ui/misc';
 import { EmptyState } from '@/components/ui/misc';
@@ -13,11 +15,20 @@ import { fmtDate, fmtDateTime } from '@/lib/format';
 export default function ReportsPage() {
   const reports = useReports();
   const create = useCreateReport();
+  const user = useAuth((s) => s.user);
+  const coops = useCooperatives();
   const [open, setOpen] = useState(false);
   const year = new Date().getFullYear();
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(new Date().toISOString().slice(0, 10));
   const [title, setTitle] = useState('');
+  const [coopId, setCoopId] = useState('');
+
+  // Un manager porte sa coopérative dans son token et l'API la déduit seule.
+  // Un rôle national (admin, régulateur) n'en a aucune : sans choix explicite,
+  // la génération échoue en 422. On lui demande donc la coopérative.
+  const needsCoop = !user?.cooperative_id;
+  const selectedCoop = needsCoop ? coopId || coops.data?.[0]?.id || '' : '';
 
   async function tokenizedDownload(reportId: string, format: 'pdf' | 'geojson') {
     // Le téléchargement passe par fetch (Authorization) puis un Blob local.
@@ -119,12 +130,20 @@ export default function ReportsPage() {
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
               Annuler
             </Button>
+            {/* `Button` résout `disabled ?? loading` : isPending est réintégré
+                ici, sinon un disabled={false} lèverait le verrou anti-double-clic. */}
             <Button
               size="sm"
               loading={create.isPending}
+              disabled={(needsCoop && !selectedCoop) || create.isPending}
               onClick={() =>
                 create.mutate(
-                  { period_start: start, period_end: end, title: title || undefined },
+                  {
+                    period_start: start,
+                    period_end: end,
+                    title: title || undefined,
+                    ...(needsCoop ? { cooperative_id: selectedCoop } : {}),
+                  },
                   {
                     onSuccess: () => {
                       toast.success('Rapport généré');
@@ -141,6 +160,27 @@ export default function ReportsPage() {
           </>
         }
       >
+        {needsCoop && (
+          <Field
+            label="Coopérative"
+            hint={
+              coops.isLoading
+                ? 'Chargement des coopératives…'
+                : coops.data?.length
+                  ? undefined
+                  : 'Aucune coopérative disponible.'
+            }
+          >
+            <Select
+              options={(coops.data ?? []).map((c) => ({
+                value: c.id,
+                label: `${c.name} (${c.code})`,
+              }))}
+              value={selectedCoop}
+              onChange={(e) => setCoopId(e.target.value)}
+            />
+          </Field>
+        )}
         <Field label="Titre (optionnel)">
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="field" />
         </Field>
