@@ -293,6 +293,11 @@ def _build_pdf(coop: Cooperative, meta: dict, rows: list[dict], summary: dict, c
     sub = ParagraphStyle("sub", parent=styles["Normal"], fontSize=10, textColor=colors.HexColor("#555"))
     body = ParagraphStyle("body", parent=styles["Normal"], fontSize=9, leading=13)
     small = ParagraphStyle("small", parent=styles["Normal"], fontSize=7.5, textColor=colors.HexColor("#666"))
+    # Les chaînes nues d'un tableau ReportLab ne se replient pas : elles
+    # débordent sur la colonne voisine. Les colonnes textuelles passent donc
+    # par des Paragraph, qui eux savent revenir à la ligne.
+    cell = ParagraphStyle("cell", parent=styles["Normal"], fontSize=7.2, leading=8.6)
+    cell_code = ParagraphStyle("cell_code", parent=cell, wordWrap="CJK")
 
     el: list = []
     el.append(Paragraph("CACAO<font color='#FF7A00'>SAT</font>", h1))
@@ -356,21 +361,30 @@ def _build_pdf(coop: Cooperative, meta: dict, rows: list[dict], summary: dict, c
     data = [head]
     for r in rows:
         data.append([
-            r["code"],
-            r["producer_name"],
+            Paragraph(r["code"], cell_code),
+            Paragraph(r["producer_name"], cell),
             f"{r['area_ha']:.2f}",
             "—" if r["score"] is None else f"{r['score']:.0f}",
+            # Laissé en chaîne nue : la couleur par statut est posée plus bas
+            # via TableStyle, qui n'a pas prise sur un Paragraph.
             {"compliant": "Conforme", "at_risk": "À vérifier",
              "non_compliant": "Non conforme", "unassessed": "Non évaluée"}[r["eudr_status"]],
-            (r["top_reason"] or "")[:70],
+            Paragraph((r["top_reason"] or "")[:70], cell),
         ])
-    pt = Table(data, colWidths=[26 * mm, 34 * mm, 16 * mm, 14 * mm, 24 * mm, 56 * mm], repeatRows=1)
+    # Largeurs calées sur le contenu réel, marge interne comprise : le code le
+    # plus large mesure 28,2 mm et le motif peut atteindre 88,9 mm — d'où le
+    # repli sur deux lignes plutôt qu'un débordement.
+    pt = Table(data, colWidths=[32 * mm, 28 * mm, 14 * mm, 11 * mm, 20 * mm, 65 * mm], repeatRows=1)
     style = [
         ("FONTSIZE", (0, 0), (-1, -1), 7.2),
         ("BACKGROUND", (0, 0), (-1, 0), CI_GREEN),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("GRID", (0, 0), (-1, -1), 0.3, colors.HexColor("#DDD")),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 3),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#FafafA")]),
     ]
     for i, r in enumerate(rows, start=1):
