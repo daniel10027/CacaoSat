@@ -47,13 +47,29 @@ for _ in $(seq 1 40); do
 done
 
 # --- 2. Backend --------------------------------------------------------
+# Le premier lancement crée le venv et télécharge ~32 Mio de dépendances :
+# quelques minutes, bien davantage sur une connexion lente. Les deux cas sont
+# distingués pour ne pas annoncer un échec alors que l'installation progresse.
+FIRST_RUN=0
+[ -d "$ROOT_DIR/backend/.venv" ] || FIRST_RUN=1
+
+PY_BIN="$(command -v python3.12 || command -v python3 || true)"
+[ -n "$PY_BIN" ] || { err "Python introuvable (3.12 attendu)."; exit 1; }
+if [ "$FIRST_RUN" -eq 1 ] && ! command -v python3.12 >/dev/null 2>&1; then
+  warn "python3.12 absent — venv créé avec $("$PY_BIN" -V 2>&1) ; le projet cible 3.12 (backend/.python-version)."
+fi
+
 log "API Flask sur 0.0.0.0:8000  (CORS → $WEB_URL)…"
+if [ "$FIRST_RUN" -eq 1 ]; then
+  log "Premier lancement : installation des dépendances Python, cela peut être long."
+  dim "Suivi : tail -f .dev/logs/backend.log"
+fi
 (
   cd "$ROOT_DIR/backend"
   if [ ! -d .venv ]; then
-    "$(command -v python3.12 || command -v python3)" -m venv .venv
-    .venv/bin/pip -q install --upgrade pip
-    .venv/bin/pip -q install -r requirements.txt
+    "$PY_BIN" -m venv .venv
+    .venv/bin/pip install --progress-bar off --upgrade pip
+    .venv/bin/pip install --progress-bar off -r requirements.txt
   fi
   export FLASK_APP=wsgi.py FLASK_CONFIG=development
   export DATABASE_URL="postgresql+psycopg://cacaosat:cacaosat@localhost:5432/cacaosat"
@@ -65,9 +81,14 @@ log "API Flask sur 0.0.0.0:8000  (CORS → $WEB_URL)…"
 ) >"$ROOT_DIR/.dev/logs/backend.log" 2>&1 &
 PIDS+=($!)
 
-wait_for_http "http://localhost:8000/api/v1/health" 60 \
-  && log "Backend prêt → ${API_URL}/api/v1" \
-  || warn "Backend lent à démarrer — voir .dev/logs/backend.log"
+# Lancement normal : l'API doit répondre vite, on attend ici. Au premier
+# lancement l'attente est reportée après le récapitulatif, pour ne pas
+# retarder de plusieurs minutes le démarrage du web et du mobile.
+if [ "$FIRST_RUN" -eq 0 ]; then
+  wait_for_http "http://localhost:8000/api/v1/health" 120 \
+    && log "Backend prêt → ${API_URL}/api/v1" \
+    || warn "Backend non joignable après 120 s — voir .dev/logs/backend.log"
+fi
 
 # --- 3. Web ----------------------------------------------------------
 if [ "$NO_WEB" -eq 0 ]; then
@@ -110,5 +131,14 @@ command -v qrencode >/dev/null 2>&1 && { echo; dim "Scanne pour ouvrir le web su
 echo
 dim "Logs : .dev/logs/{backend,web,mobile}.log   ·   Ctrl+C pour tout arrêter"
 echo
+
+# Premier lancement : l'installation des dépendances court toujours en tâche
+# de fond. On l'attend ici, après le récapitulatif, avec une marge réaliste.
+if [ "$FIRST_RUN" -eq 1 ]; then
+  log "Installation en cours — attente du démarrage de l'API (jusqu'à 30 min)…"
+  wait_for_http "http://localhost:8000/api/v1/health" 1800 \
+    && log "Backend prêt → ${API_URL}/api/v1" \
+    || warn "Backend non joignable après 30 min — voir .dev/logs/backend.log"
+fi
 
 wait
