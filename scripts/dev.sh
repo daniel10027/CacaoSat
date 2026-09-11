@@ -77,7 +77,10 @@ fi
   export CORS_ORIGINS="http://localhost:5173,${WEB_URL}"
   .venv/bin/flask db upgrade
   if [ "$SEED_DEMO" -eq 1 ]; then .venv/bin/flask seed && .venv/bin/flask seed-demo; else .venv/bin/flask seed || true; fi
-  exec .venv/bin/flask run --host 0.0.0.0 --port 8000
+  # --reload : toute modification Python est prise en compte sans redémarrage.
+  # Le rechargeur lance un processus enfant, mais tuer le parent le fait bien
+  # partir (vérifié) — le cleanup du script suffit donc à libérer le port 8000.
+  exec .venv/bin/flask run --host 0.0.0.0 --port 8000 --reload
 ) >"$ROOT_DIR/.dev/logs/backend.log" 2>&1 &
 PIDS+=($!)
 
